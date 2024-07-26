@@ -1,11 +1,9 @@
 import React from 'react';
 import { TouchableOpacity, Image } from 'react-native';
 import { Header } from 'react-native-elements';
-import { useNavigation } from '@react-navigation/native';
 import appTheme from '../appTheme';
 
 export default function AppHeader() {
-//        <TouchableOpacity onPress={() => navigation.openDrawer()}>
 
   return (
     <Header
