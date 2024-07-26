@@ -4,10 +4,10 @@ export default function TabsLayout() {
     return (
         <Tabs>      
             <Tabs.Screen
-                name="MyTraining"
+                name="MyTrainingPlan"
                 options={{
                     headerShown: false,
-                    title: 'My Trainings'
+                    title: 'My training plan'
                 }}
             />      
             <Tabs.Screen
