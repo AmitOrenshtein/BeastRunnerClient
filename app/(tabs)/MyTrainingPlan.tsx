@@ -4,6 +4,7 @@ import moment from "moment";
 import { Dimensions } from 'react-native';
 import WorkoutList from "../MyTrainingPlan/WorkoutList";
 const { width, height } = Dimensions.get('window');
+import { Icon } from 'react-native-elements';
 
 
 export default function MyTrainingPlan() {
@@ -12,13 +13,13 @@ export default function MyTrainingPlan() {
     const dateToolBar = (
         <View style={{flexDirection: 'row', justifyContent:"center"}}>
             <Pressable style={styles.button} onPress={() => setDateFilter(moment(dateFilter).subtract(1, "w").toDate())}>
-                <Text style={styles.text}>{"Previous week"}</Text>
+                <Icon name='west' />
             </Pressable>
             <Text style={{...styles.text, paddingVertical: 12, color: "black"}}>
                 {moment(dateFilter).format("DD/MM/YY").toString()} - {moment(dateFilter).add(1, "w").format("DD/MM/YY").toString()}
             </Text>
             <Pressable style={styles.button} onPress={() => setDateFilter(moment(dateFilter).add(1, "w").toDate())}>
-                <Text style={styles.text}>{"Next week"}</Text>
+                <Icon name='east' />
             </Pressable>
         </View>
     )
@@ -42,8 +43,7 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         elevation: 3,
         marginHorizontal:15,
-        width:width / 8,
-        backgroundColor:"#3491bf",
+        width:width / 12,
       },
       text: {
         fontSize: 16,

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
+import { Icon } from 'react-native-elements';
 
 
 export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
@@ -33,7 +34,7 @@ export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
                 <Text style={styles.date}>{moment(workout.date).format("DD/MM/YY")}</Text>
                 <Text style={styles.title}>{workout.workout}</Text>
             </View>
-            <Text style={{marginRight: 30}}>"end"</Text>
+            <Icon style={{marginRight: 30}} name='edit' />
         </View>
       );
 
