@@ -2,12 +2,12 @@ export interface Plan {
     plan: WeeklyPlan[];
 }
 
-interface WeeklyPlan {
-    days: Training[];
+export interface WeeklyPlan {
+    days: Workout[];
     week: number;
 }
 
-interface Training {
+export interface Workout {
     date: Date | string;
     workout: string;
 }
