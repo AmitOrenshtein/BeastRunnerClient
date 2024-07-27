@@ -16,7 +16,7 @@ export default function MyTrainingPlan() {
                 <Icon name='west' />
             </Pressable>
             <Text style={{...styles.text, paddingVertical: 12, color: "black"}}>
-                {moment(dateFilter).format("DD/MM/YY").toString()} - {moment(dateFilter).add(1, "w").format("DD/MM/YY").toString()}
+                {moment(dateFilter).format("DD/MM/YY").toString()} - {moment(dateFilter).add(6, "d").format("DD/MM/YY").toString()}
             </Text>
             <Pressable style={styles.button} onPress={() => setDateFilter(moment(dateFilter).add(1, "w").toDate())}>
                 <Icon name='east' />
@@ -45,10 +45,10 @@ const styles = StyleSheet.create({
         marginHorizontal:15,
         width:width / 12,
       },
-      text: {
+    text: {
         fontSize: 16,
         lineHeight: 21,
         letterSpacing: 0.25,
         color: 'white',
-      },
+    },
   });
