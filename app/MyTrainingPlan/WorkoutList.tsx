@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, FlatList } from "react-native";
+import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, FlatList, Platform } from "react-native";
 import { WeeklyPlan, Workout } from "../types/training";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
@@ -12,7 +12,7 @@ import { getPlan } from "../api/serverApi";
 export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [editedWorkout, setEditedWorkout] = useState<Workout>({date: new Date(), workout: ""});
-    const [plan, setPlan] = useState<WeeklyPlan[]>();
+    const [plan, setPlan] = useState<WeeklyPlan[]>([]);
 
     useEffect(() => {
         getPlan().then((res) => setPlan(res.data.plan))
@@ -27,7 +27,7 @@ export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
     }
 
     const findDailyWorkout = (day: Date):Workout=> {
-        let dailyTraining: Workout = {date: day, workout: ""};        
+        let dailyTraining: Workout = {date: day, workout: "Rest"};        
         plan?.forEach((week) => 
             week.days.forEach((training) => 
                 {if(moment(training.date).format("DD/MM/YY") === moment(day).format("DD/MM/YY")) dailyTraining.workout = training.workout}
@@ -55,7 +55,7 @@ export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
                 renderItem={(item) =>  <Item workout={item.item}></Item>}
                 keyExtractor={(item: Workout) => item.date.toString()}
             />
-            <EditWorkout modalVisible={modalVisible} setWorkout={setEditedWorkout} setModalVisible={setModalVisible} workout={editedWorkout}/>
+            <EditWorkout plan={plan} setPlan={setPlan} modalVisible={modalVisible} setWorkout={setEditedWorkout} setModalVisible={setModalVisible} workout={editedWorkout}/>
         </SafeAreaView>
     );
 };
