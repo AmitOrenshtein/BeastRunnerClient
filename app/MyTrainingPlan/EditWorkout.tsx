@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, FlatList, Modal, TextInput } from "react-native";
-import { Plan, Workout } from "../types/training";
+import {Workout } from "../types/training";
 import React, { SetStateAction, useEffect, useState } from "react";
 import moment from "moment";
 import { Dimensions } from 'react-native';
