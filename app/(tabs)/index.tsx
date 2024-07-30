@@ -1,5 +1,6 @@
-import { Text, View, StyleSheet } from "react-native";
 import CreateNewPlan from "../CreateNewPlan";
+import { router } from "expo-router";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 // import { PlanAPI } from "@/serverAPI/PlanAPI";
 // import { Gender } from "../types/userFitness";
 
@@ -27,10 +28,35 @@ export default function HomePage() {
   );
 }
 
+function WorkoutBtn() {    
+
+    function onClick() {
+        router.replace('/Workout');
+    }
+
+    return (
+            <TouchableOpacity style={styles.workoutBtn} onPress={onClick}>
+                <Text>Workout</Text>
+            </TouchableOpacity>
+    )
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    workoutBtn: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        height: 60,
+        width: 60,
+        backgroundColor: 'grey',
+        borderRadius: 100
+    }
+  });
