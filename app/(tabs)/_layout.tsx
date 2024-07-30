@@ -31,6 +31,15 @@ export default function TabsLayout() {
                     tabBarIcon: () => <AntDesign name='edit' size={24} color={appTheme.colors.themeColor} />
                 }}
             />
+            
+            <Tabs.Screen
+                name="Workout"
+                options={{
+                    headerShown: false,
+                    title: 'Workout',
+                    href: null,
+                }}
+            />
         </Tabs>
     )
 }
