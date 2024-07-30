@@ -1,13 +1,17 @@
 import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, FlatList, Modal, TextInput } from "react-native";
-import { Plan, Workout } from "../types/training";
+import {WeeklyPlan, Workout } from "../types/training";
 import React, { SetStateAction, useEffect, useState } from "react";
 import moment from "moment";
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
+import { updatePlan } from "../api/serverApi";
 
 
-export default function EditWorkout({workout, setWorkout, modalVisible, setModalVisible}: {workout: Workout, setWorkout: React.Dispatch<React.SetStateAction<Workout>>, modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
+export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVisible, setModalVisible}: 
+    {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
+        workout: Workout, setWorkout: React.Dispatch<React.SetStateAction<Workout>>, 
+        modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
     const [editedWorkout, setEditedWorkout] = useState<string>(workout.workout);
 
     useEffect(() => {
@@ -17,7 +21,15 @@ export default function EditWorkout({workout, setWorkout, modalVisible, setModal
     const onSaveHandler = () => {
         console.log(`Saves workout for date: ${workout.date}`);
         console.log(`Workout: ${editedWorkout}`);
-        setModalVisible(!modalVisible);
+    
+        const updatedPlan:WeeklyPlan[] = plan.map((week) => 
+            ({week: week.week, days: week.days.map(day => 
+                moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
+            { date: day.date ,workout: editedWorkout} : { date: day.date ,workout: day.workout}) }))
+        updatePlan(updatedPlan).then((res) => {
+            setPlan(res.data.plan);
+            setModalVisible(!modalVisible);
+        })
     }
 
 
