@@ -40,6 +40,14 @@ export default function TabsLayout() {
                     href: null,
                 }}
             />
+            <Tabs.Screen
+                name="ProgressAndStats"
+                options={{
+                    headerShown: false,
+                    title: 'Progress And Stats',
+                    href: null,
+                }}
+            />
         </Tabs>
     )
 }
