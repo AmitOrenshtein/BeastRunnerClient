@@ -11,4 +11,11 @@ export enum Gender {
     moveMinuets?: number;
     heartPoints?: number;
   }
+
+  export interface UserPreferences {
+    userRunningLevel?: string;
+    userRunningGoal?: string;
+    startDate?: string;
+    endDate?: string;
+  }
   
