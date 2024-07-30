@@ -1,7 +1,3 @@
-export interface Plan {
-    plan: WeeklyPlan[];
-}
-
 export interface WeeklyPlan {
     days: Workout[];
     week: number;
@@ -10,4 +6,11 @@ export interface WeeklyPlan {
 export interface Workout {
     date: Date | string;
     workout: string;
+}
+
+export interface PlanResponse {
+    user_id: string;
+    plan: WeeklyPlan[];
+    _id: string;
+    lut: Date;
 }
