@@ -5,10 +5,13 @@ import { PlanAPI } from "@/serverAPI/PlanAPI";
 import UserLevel from "./UserLevel";
 import UserGoal from "./UserGoal";
 import { Gender, UserPreferences } from "../types/user";
+import PlanDates from "./PlanDates";
 
 enum Attributes {
   userRunningLevel = "userRunningLevel",
   userRunningGoal = "userRunningGoal",
+  startDate = "startDate",
+  endDate = "endDate",
 }
 
 const CreateNewPlan: FC = () => {
@@ -23,6 +26,12 @@ const CreateNewPlan: FC = () => {
     try {
       const plan = await PlanAPI.generatePlan({
         userPreferences: userPreferences,
+        userFitnessData: {
+          age: 24,
+          gender: Gender.male,
+          height: 180,
+          weight: 72,
+        },
         //   userFitnessData: TODO: get data from google fit
       });
       console.log(plan);
@@ -33,8 +42,9 @@ const CreateNewPlan: FC = () => {
     }
   };
 
-  const handleChangeRadioBtn =
+  const handleChangePreferences =
     (attributeName: Attributes) => (checkedValue: string) => {
+        console.log(checkedValue);
       setUserPreferences((prev) => {
         return {
           ...prev,
@@ -46,12 +56,24 @@ const CreateNewPlan: FC = () => {
   const content = [
     <UserLevel
       userLevel={userPreferences?.userRunningLevel || ""}
-      dispatchUserLevel={handleChangeRadioBtn(Attributes.userRunningLevel)}
+      dispatchUserLevel={handleChangePreferences(
+        Attributes.userRunningLevel
+      )}
     />,
     <UserGoal
       userGoal={userPreferences?.userRunningLevel || ""}
-      dispatchUserGoal={handleChangeRadioBtn(Attributes.userRunningGoal)}
+      dispatchUserGoal={handleChangePreferences(
+        Attributes.userRunningGoal
+      )}
     />,
+    <PlanDates
+      label="Start Date"
+      dispatchDate={handleChangePreferences(Attributes.startDate)}
+    />,
+    <PlanDates
+      label="End Date"
+      dispatchDate={handleChangePreferences(Attributes.endDate)}
+    />
   ];
 
   return (

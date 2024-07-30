@@ -15,5 +15,7 @@ export enum Gender {
   export interface UserPreferences {
     userRunningLevel?: string;
     userRunningGoal?: string;
+    startDate?: string;
+    endDate?: string;
   }
   
