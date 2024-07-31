@@ -5,8 +5,7 @@ import moment from "moment";
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
-import { updatePlan } from "../api/serverApi";
-
+import { PlanAPI } from "@/serverAPI/PlanAPI";
 
 export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVisible, setModalVisible}: 
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
@@ -26,7 +25,7 @@ export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVi
             ({week: week.week, days: week.days.map(day => 
                 moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
             { date: day.date ,workout: editedWorkout} : { date: day.date ,workout: day.workout}) }))
-        updatePlan(updatedPlan).then((res) => {
+            PlanAPI.updatePlan(updatedPlan).then((res) => {
             setPlan(res.data.plan);
             setModalVisible(!modalVisible);
         })

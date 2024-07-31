@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: process.env.RAECT_APP_SERVER_URL || "http://localhost:8000/",
+  baseURL: process.env.RAECT_APP_SERVER_URL || "http://localhost:8080/",
 });
 
 // defining a custom error handler for all APIs
