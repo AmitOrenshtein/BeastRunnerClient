@@ -15,7 +15,7 @@ export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
     const [plan, setPlan] = useState<WeeklyPlan[]>([]);
 
     useEffect(() => {
-        getPlan().then((res) => setPlan(res.data.plan))
+        //getPlan().then((res) => setPlan(res.data.plan))
     }, []);
 
     const getDaysInWeek = ():Date[] => {

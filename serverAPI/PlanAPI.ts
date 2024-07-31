@@ -1,5 +1,7 @@
 import { api } from "./config/axiosConfig";
 import { UserFitnessData, UserPreferences } from "../app/types/user";
+import { PlanResponse, WeeklyPlan } from "@/app/types/training";
+import axios, { AxiosResponse } from "axios";
 
 interface GeneratePlanI {
   userFitnessData?: UserFitnessData,
@@ -15,12 +17,13 @@ export const PlanAPI = {
     return response.data;
   },
 
-  // Another example 
-  getPlans: async function (userId: string) {
-    const response = await api.get(`/plan/${userId}`);
-    return response.data;
+  getPlan: async function ():Promise<AxiosResponse<PlanResponse>> {
+    return api.get('/getPlan')
   },
+
+  updatePlan: async function (updatedPlan: WeeklyPlan[]):Promise<AxiosResponse<PlanResponse>> {
+    return api.post('/updatePlan', {
+      updatedPlan
+    });
+  }
 };
-
-
-
