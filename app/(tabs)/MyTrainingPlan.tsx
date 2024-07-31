@@ -5,6 +5,7 @@ import { Dimensions } from 'react-native';
 import WorkoutList from "../MyTrainingPlan/WorkoutList";
 const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
+import { BasicTimeline } from "../MyTrainingPlan/WorkoutsList";
 
 
 export default function MyTrainingPlan() {
@@ -27,7 +28,8 @@ export default function MyTrainingPlan() {
     return (
         <View style={styles.container}>
             {dateToolBar}
-            <WorkoutList dateFilter={dateFilter}/>
+            {/* <WorkoutList dateFilter={dateFilter}/> */}
+            <BasicTimeline/>
         </View>
     );
 };
