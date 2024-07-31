@@ -8,7 +8,7 @@ interface GeneratePlanI {
 
 export const PlanAPI = {
   generatePlan: async function ({userFitnessData, userPreferences }: GeneratePlanI) {
-    const response = await api.post<GeneratePlanI>(`/plan`, {
+    const response = await api.post<GeneratePlanI>(`/generatePlan`, {
       userFitnessData: userFitnessData,
       userPreferences: userPreferences 
     });
