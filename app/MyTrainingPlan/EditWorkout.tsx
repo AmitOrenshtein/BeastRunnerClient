@@ -18,9 +18,6 @@ export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVi
     }, [workout])
 
     const onSaveHandler = () => {
-        console.log(`Saves workout for date: ${workout.date}`);
-        console.log(`Workout: ${editedWorkout}`);
-    
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
                 moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
@@ -70,8 +67,8 @@ export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVi
 
 const styles = StyleSheet.create({
     modalView: {
-        marginHorizontal:width / 2.75,
-        marginVertical: height / 3,
+        marginHorizontal:'10%',
+        marginVertical: '35vh',
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,
@@ -102,10 +99,11 @@ const styles = StyleSheet.create({
       textAlign: 'center',
     },
     input: {
-        width: width / 5,
+        width: 'auto',
         margin: 15,
         borderWidth: 1,
         padding: 10,
       },
   });
+  
   
