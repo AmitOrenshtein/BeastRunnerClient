@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TouchableOpacity, Image, StyleSheet, View } from 'react-native';
 import { Header } from 'react-native-elements';
 import appTheme from '../appTheme';
-import NotificationModal from '../components/NotificationsModal'; // Import the custom slide-in component
+import NotificationModal from '../components/NotificationsModal'; 
 
 const styles = StyleSheet.create({
   title: {
@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     height: 40
   },
   headerContainer: {
-    zIndex: 1000, // Ensure the header is above the modal
+    zIndex: 1000,
   }
 });
 
