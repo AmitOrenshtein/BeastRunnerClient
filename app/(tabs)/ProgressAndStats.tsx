@@ -1,10 +1,9 @@
 import { Text, View, StyleSheet } from "react-native";
-import CreateNewPlan from "../CreateNewPlan";
 
-export default function MyTraining() {
+export default function ProgressAndStats() {
     return (
         <View style={styles.container}>
-            <CreateNewPlan />
+            <Text>Progress and stats page!</Text>
         </View>
     );
 };
