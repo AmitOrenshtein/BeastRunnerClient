@@ -6,7 +6,7 @@ import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
 import EditWorkout from "./EditWorkout";
-import { getPlan } from "../api/serverApi";
+import { PlanAPI } from "@/serverAPI/PlanAPI";
 
 
 export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
@@ -15,7 +15,7 @@ export default function WorkoutList({dateFilter}:{dateFilter: Date}) {
     const [plan, setPlan] = useState<WeeklyPlan[]>([]);
 
     useEffect(() => {
-        getPlan().then((res) => setPlan(res.data.plan))
+        //PlanAPI.getPlan()
     }, []);
 
     const getDaysInWeek = ():Date[] => {

@@ -1,9 +1,10 @@
 import { Text, View, StyleSheet } from "react-native";
+import CreateNewPlan from "../CreateNewPlan";
 
 export default function MyTraining() {
     return (
         <View style={styles.container}>
-            <Text>Persona lInfo page!</Text>
+            <CreateNewPlan />
         </View>
     );
 };
