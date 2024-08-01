@@ -1,10 +1,22 @@
-import React from 'react';
+import { PlanAPI } from '@/serverAPI/PlanAPI';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
 
 const { width } = Dimensions.get('window');
 
 const NotificationModal = ({ isVisible, onClose }) => {
+
+  const [todayWorkout, setTodayWorkout] = useState('gg');
+
+  useEffect(() => {
+    PlanAPI.getWorkout(new Date()).then((res) => {
+      console.log(res)
+      console.log(res.data[0].workout)
+      setTodayWorkout(res.data[0].workout)
+      })
+  }, []);
+
   return (
     <Modal
       isVisible={isVisible}
@@ -15,8 +27,7 @@ const NotificationModal = ({ isVisible, onClose }) => {
     >
       <View style={styles.container}>
         <Text style={styles.title}>Notifications</Text>
-        {/* Add your notification content here */}
-        <Text>New message received</Text>
+        <Text>{todayWorkout}</Text>
       </View>
     </Modal>
   );
@@ -31,8 +42,8 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     backgroundColor: 'white',
     padding: 20,
-    borderTopLeftRadius: 10,
-    borderBottomLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
     height: '100%',
     alignSelf: 'flex-start',
   },
