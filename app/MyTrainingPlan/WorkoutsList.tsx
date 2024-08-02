@@ -26,9 +26,21 @@ export const BasicTimeline = () => {
               <Text style={{marginBottom: 0, color: '#5384cf'}}>
                 {workout.workout}
               </Text>
+              {moment().isBefore(workout.date) ? 
               <Pressable onPress={() => {setEditedWorkout(workout); setModalVisible(true)}}>
                   <Icon name='edit' />
-              </Pressable>
+              </Pressable> : 
+              <View style={styles.row}>
+                <Pressable style={{marginHorizontal:4}} onPress={() => {setEditedWorkout(workout); setModalVisible(true)}}>
+                <Text style={{fontSize: 14, color: '#999', marginBottom: 7}}>
+                   feedback
+                </Text>
+                </Pressable>
+                <Text style={{fontSize: 14, color: '#999', marginBottom: 7}}>
+                   feedback
+                </Text>
+              </View>
+              }
             </View>
           </View>
         ),
@@ -76,6 +88,6 @@ export const BasicTimeline = () => {
     },
     row: {
       justifyContent:"space-between",
-        flexDirection:"row",
+      flexDirection:"row",
     },
   });

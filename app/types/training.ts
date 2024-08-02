@@ -6,6 +6,9 @@ export interface WeeklyPlan {
 export interface Workout {
     date: Date | string;
     workout: string;
+    difficultyFeedback?: number;
+    completedDistance?: number;
+    completedTime?: number;
 }
 
 export interface PlanResponse {

@@ -33,15 +33,6 @@ export default function TabsLayout() {
             />
             
             <Tabs.Screen
-                name="PreviousTrainings"
-                options={{
-                    headerShown: false,
-                    title: 'Previous trainings',
-                    href: null,
-                }}
-            />
-            
-            <Tabs.Screen
                 name="Workout"
                 options={{
                     headerShown: false,
