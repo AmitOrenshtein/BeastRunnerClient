@@ -1,7 +1,7 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
-import {Timeline} from "react-native-just-timeline";
+// import {Timeline} from "react-native-just-timeline";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { WeeklyPlan, Workout } from "../types/training";
 import { TimelineObject } from "../types/timeline";
@@ -26,9 +26,21 @@ export const BasicTimeline = () => {
               <Text style={{marginBottom: 0, color: '#5384cf'}}>
                 {workout.workout}
               </Text>
+              {moment().isBefore(workout.date) ? 
               <Pressable onPress={() => {setEditedWorkout(workout); setModalVisible(true)}}>
                   <Icon name='edit' />
-              </Pressable>
+              </Pressable> : 
+              <View style={styles.row}>
+                <Pressable style={{marginHorizontal:4}} onPress={() => {setEditedWorkout(workout); setModalVisible(true)}}>
+                <Text style={{fontSize: 14, color: '#999', marginBottom: 7}}>
+                   feedback
+                </Text>
+                </Pressable>
+                <Text style={{fontSize: 14, color: '#999', marginBottom: 7}}>
+                   feedback
+                </Text>
+              </View>
+              }
             </View>
           </View>
         ),
@@ -64,7 +76,7 @@ export const BasicTimeline = () => {
   
     return (
       <>
-        <Timeline data={workouts}  />
+        {/* <Timeline data={workouts}  /> */}
         <EditWorkout plan={plan} setPlan={setPlan} modalVisible={modalVisible} setWorkout={setEditedWorkout} setModalVisible={setModalVisible} workout={editedWorkout}/>
         </>
     );
@@ -76,6 +88,9 @@ export const BasicTimeline = () => {
     },
     row: {
       justifyContent:"space-between",
-        flexDirection:"row",
+      flexDirection:"row",
     },
   });
+
+
+  // "react-native-just-timeline": "^0.0.2",
