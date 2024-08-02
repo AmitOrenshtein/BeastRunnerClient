@@ -1,7 +1,7 @@
 import { api } from "./config/axiosConfig";
 import { UserFitnessData, UserPreferences } from "../app/types/user";
 import { PlanResponse, WeeklyPlan, Workout } from "@/app/types/training";
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 
 interface GeneratePlanI {
   userFitnessData?: UserFitnessData,
@@ -29,5 +29,5 @@ export const PlanAPI = {
     return api.post('/updatePlan', {
       updatedPlan
     });
-  }
+  },
 };

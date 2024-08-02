@@ -10,7 +10,7 @@ import { Icon } from 'react-native-elements';
 export default function MyTrainingPlan() {
     return (
         <View style={styles.container}>
-            <BasicTimeline/>
+            {/* <BasicTimeline/> */}
         </View>
     );
 };
