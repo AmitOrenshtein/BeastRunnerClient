@@ -7,9 +7,11 @@ import EditWorkout from "./EditWorkout";
 const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
 import { Card, Button } from 'react-native-paper';
+import WorkoutFeedback from "./workoutFeedback";
 
 export const BasicTimeline = () => {
-    const [editPlanModalVisible, setEditPlanModalVisible] = useState<boolean>(false)
+    const [editPlanModalVisible, setEditPlanModalVisible] = useState<boolean>(false);
+    const [feedbackModalVisible, setFeedbackModalVisible] = useState<boolean>(false);
     const [editedWorkout, setEditedWorkout] = useState<Workout>({date: new Date(), workout: ""});
     const [plan, setPlan] = useState<WeeklyPlan[]>([]);
 
@@ -34,7 +36,7 @@ export const BasicTimeline = () => {
                   {workout.workout}
                 </Text>
                 {moment().isBefore(workout.date) && 
-                <Pressable onPress={() => {setEditedWorkout(workout); setModalVisible(true)}}>
+                <Pressable onPress={() => {setEditedWorkout(workout); setEditPlanModalVisible(true)}}>
                     <Icon name='edit' />
                 </Pressable>}
               </View>
@@ -44,7 +46,7 @@ export const BasicTimeline = () => {
                     <Text style={{fontSize: 12, color: '#077a28'}}>
                     {workout.completedTime}" | {workout.completedDistance} KM
                     </Text>}
-                  <Pressable style={{marginTop:6}} onPress={() => {setEditedWorkout(workout); setEditPlanModalVisible(true)}}>
+                  <Pressable style={{marginTop:6}} onPress={() => {setEditedWorkout(workout); setFeedbackModalVisible(true)}}>
                     <Text style={{fontSize: 12, color: '#999', marginBottom: 7}}>
                         feedback
                     </Text>
@@ -62,7 +64,8 @@ export const BasicTimeline = () => {
     return (
       <>
       {cardsList()}
-        <EditWorkout plan={plan} setPlan={setPlan} modalVisible={editPlanModalVisible} setWorkout={setEditedWorkout} setModalVisible={setEditPlanModalVisible} workout={editedWorkout}/>
+        <EditWorkout plan={plan} setPlan={setPlan} modalVisible={editPlanModalVisible} setModalVisible={setEditPlanModalVisible} workout={editedWorkout}/>
+        <WorkoutFeedback plan={plan} setPlan={setPlan} modalVisible={feedbackModalVisible} setModalVisible={setFeedbackModalVisible} workout={editedWorkout}/>
       </>
     );
   };

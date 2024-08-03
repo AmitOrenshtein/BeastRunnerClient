@@ -1,15 +1,15 @@
-import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, FlatList, Modal, TextInput } from "react-native";
+import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
 import {WeeklyPlan, Workout } from "../types/training";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { Dimensions } from 'react-native';
-const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
+import { TextInput } from 'react-native-paper';
 
-export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVisible, setModalVisible}: 
+export default function EditWorkout({plan, setPlan, workout, modalVisible, setModalVisible}: 
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
-        workout: Workout, setWorkout: React.Dispatch<React.SetStateAction<Workout>>, 
+        workout: Workout, 
         modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
     const [editedWorkout, setEditedWorkout] = useState<string>(workout.workout);
 
@@ -40,10 +40,12 @@ export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVi
         <View style={styles.modalView}>
             <Text style={styles.modalText}>{moment(workout.date).format('ll')}</Text>
             <TextInput
+            style={{marginVertical:5}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                mode="outlined"
                 editable
                 multiline
-                numberOfLines={4}
-                style={styles.input}
+                numberOfLines={2}
                 onChangeText={setEditedWorkout}
                 value={editedWorkout}
             />
@@ -96,13 +98,8 @@ const styles = StyleSheet.create({
     modalText: {
       marginBottom: 15,
       textAlign: 'center',
+      color:"gray"
     },
-    input: {
-        width: 'auto',
-        margin: 15,
-        borderWidth: 1,
-        padding: 10,
-      },
   });
   
   

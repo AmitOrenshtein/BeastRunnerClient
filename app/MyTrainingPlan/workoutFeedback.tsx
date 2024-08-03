@@ -1,27 +1,26 @@
-import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, FlatList, Modal, TextInput } from "react-native";
+import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
 import {WeeklyPlan, Workout } from "../types/training";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { Dimensions } from 'react-native';
-const { width, height } = Dimensions.get('window');
-import { Icon } from 'react-native-elements';
+import { Divider, Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
+import { SegmentedButtons, TextInput } from 'react-native-paper';
 
-export default function workoutFeedback({plan, setPlan, workout, setWorkout, modalVisible, setModalVisible}: 
+export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}: 
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
-        workout: Workout, setWorkout: React.Dispatch<React.SetStateAction<Workout>>, 
+        workout: Workout,
         modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
-    const [editedWorkout, setEditedWorkout] = useState<string>(workout.workout);
+    const [editedWorkout, setEditedWorkout] = useState<Workout>(workout);
 
     useEffect(() => {
-        workout && setEditedWorkout(workout.workout)
+        workout && setEditedWorkout(workout)
     }, [workout])
 
     const onSaveHandler = () => {
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
                 moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
-            { date: day.date ,workout: editedWorkout} : { date: day.date ,workout: day.workout}) }))
+            { date: day.date ,workout: editedWorkout.workout} : { date: day.date ,workout: day.workout}) }))
             PlanAPI.updatePlan(updatedPlan).then((res) => {
                 setPlan(res.data.plan);
                 setModalVisible(!modalVisible);
@@ -40,13 +39,59 @@ export default function workoutFeedback({plan, setPlan, workout, setWorkout, mod
         <View style={styles.modalView}>
             <Text style={styles.modalText}>{moment(workout.date).format('ll')}</Text>
             <TextInput
+                keyboardType="numeric"
+                style={{marginVertical:5}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                label={"Total time (minutes)"}
+                mode="outlined"
                 editable
-                multiline
-                numberOfLines={4}
-                style={styles.input}
-                onChangeText={setEditedWorkout}
-                value={editedWorkout}
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
+                value={editedWorkout.completedTime || 0}
             />
+            <TextInput
+                keyboardType="numeric"
+                style={{marginVertical:5}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                label={"Completed distance (km)"}
+                mode="outlined"
+                editable
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
+                value={editedWorkout.completedDistance || 0}
+            />
+            <Text style={styles.modalText}>How difficult was the workout?</Text>
+            <SegmentedButtons
+                style={{marginVertical:10}}
+                density="medium"
+                value={editedWorkout.difficultyFeedback?.toString() || "3"}
+                onValueChange={(text) => setEditedWorkout({...editedWorkout, difficultyFeedback:Number.parseInt(text)})}
+                buttons={[
+                {
+                    value: '1',
+                    label: '1',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '2',
+                    label: '2',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '3',
+                    label: '3',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '4',
+                    label: '4',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '5',
+                    label: '5',
+                    style:{minWidth:15}
+                },
+                ]}
+      />
           <View style={{flexDirection:"row"}}>
             <Pressable
             style={[styles.button, styles.buttonClose]}
@@ -67,7 +112,7 @@ export default function workoutFeedback({plan, setPlan, workout, setWorkout, mod
 const styles = StyleSheet.create({
     modalView: {
         marginHorizontal:'10%',
-        marginVertical: '35vh',
+        marginVertical: '15vh',
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,
@@ -94,14 +139,13 @@ const styles = StyleSheet.create({
       textAlign: 'center',
     },
     modalText: {
-      marginBottom: 15,
+      marginVertical: 10,
       textAlign: 'center',
+      color:"gray"
     },
-    input: {
-        width: 'auto',
-        margin: 15,
-        borderWidth: 1,
-        padding: 10,
+      row: {
+        justifyContent:"space-between",
+        flexDirection:"row",
       },
   });
   
