@@ -1,21 +1,19 @@
-import { PlanAPI } from '@/serverAPI/PlanAPI';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, AppState } from 'react-native';
 import Modal from 'react-native-modal';
-//import * as BackgroundFetch from 'expo-background-fetch';
 import { Notification } from '@/app/types/notification';
 import { NotificationAPI } from '@/serverAPI/NotificationAPI';
 
 interface NotificationModalProps {
   isVisible: boolean;
   onClose: () => void;
+  setNotificationsNumber: (notifications: number) => void;
 }
 
 const { width } = Dimensions.get('window');
-//const BACKGROUND_FETCH_TASK = 'background-fetch';
 
 const NotificationModal = (props: NotificationModalProps) => {
-  const { isVisible, onClose } = props;
+  const { isVisible, onClose, setNotificationsNumber } = props;
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -26,42 +24,17 @@ const NotificationModal = (props: NotificationModalProps) => {
   }
 
   useEffect(() => {
-    fetchNotifications();
-  }, [])
-
-  // TODO: get notification number when the drawer is closed
-  // useEffect(() => {
-  //   const registerBackgroundFetch = async () => {
-  //     try {
-  //       await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-  //         minimumInterval: 60 * 1440, //  24 hours
-  //         stopOnTerminate: false,
-  //         startOnBoot: true,
-  //       });
-  //     } catch (error) {
-  //       console.error('Error registering background fetch task:', error);
-  //     }
-  //   };
-
-  //   registerBackgroundFetch();
-
-  //   const now = new Date();
-  //   const targetTime = new Date();
-  //   targetTime.setHours(16, 26, 0, 0);
-  //   const delay = targetTime.getTime() - now.getTime();
-  //   if (delay > 0) {
-  //     setTimeout(fetchTodaysWorkout, delay);
-  //   }
-
-  //   return () => {
-  //     BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-  //   };
-  // }, [])
+    if (isVisible) fetchNotifications();
+  }, [isVisible])
 
   const removeNotification = async (_id: string) => {
     await NotificationAPI.deleteNotification(_id);
     await fetchNotifications();
   }
+
+  useEffect(() => {
+    setNotificationsNumber(notifications.length);
+  }, [notifications])
 
   return (
     <Modal
