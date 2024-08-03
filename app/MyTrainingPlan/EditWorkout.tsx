@@ -11,17 +11,17 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
         workout: Workout, 
         modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
-    const [editedWorkout, setEditedWorkout] = useState<string>(workout.workout);
+    const [editedWorkout, setEditedWorkout] = useState<Workout>(workout);
 
     useEffect(() => {
-        workout && setEditedWorkout(workout.workout)
+        workout && setEditedWorkout(workout)
     }, [workout])
 
     const onSaveHandler = () => {
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
                 moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
-            { date: day.date ,workout: editedWorkout} : { date: day.date ,workout: day.workout}) }))
+            editedWorkout : day) }))
             PlanAPI.updatePlan(updatedPlan).then((res) => {
                 setPlan(res.data.plan);
                 setModalVisible(!modalVisible);
@@ -46,8 +46,8 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
                 editable
                 multiline
                 numberOfLines={2}
-                onChangeText={setEditedWorkout}
-                value={editedWorkout}
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, workout:text})}
+                value={editedWorkout.workout}
             />
           <View style={{flexDirection:"row"}}>
             <Pressable

@@ -41,7 +41,7 @@ export const BasicTimeline = () => {
                 </Pressable>}
               </View>
               { !moment().isBefore(workout.date) &&
-                <View style={styles.row}>
+                <View style={{...styles.row, marginTop: 6}}>
                   {workout.completedDistance && workout.completedDistance && 
                     <Text style={{fontSize: 12, color: '#077a28'}}>
                     {workout.completedTime}" | {workout.completedDistance} KM

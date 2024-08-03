@@ -20,7 +20,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
                 moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
-            { date: day.date ,workout: editedWorkout.workout} : { date: day.date ,workout: day.workout}) }))
+            editedWorkout : day) }))
             PlanAPI.updatePlan(updatedPlan).then((res) => {
                 setPlan(res.data.plan);
                 setModalVisible(!modalVisible);
