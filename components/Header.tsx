@@ -39,7 +39,7 @@ export default function AppHeader() {
   useEffect(() => {
     fetchNotificationsNumber();
 
-    const intervalId = setInterval(fetchNotificationsNumber, 15000);
+    const intervalId = setInterval(fetchNotificationsNumber, 60000);
 
     return () => clearInterval(intervalId);
   }, []);

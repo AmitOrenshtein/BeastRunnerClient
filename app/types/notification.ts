@@ -3,4 +3,5 @@ export interface Notification {
     user_id: string;
     workout: string;
     _id: string;
+    date: string;
 }

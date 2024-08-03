@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Dimensions, AppState } from 'react-native';
 import Modal from 'react-native-modal';
 import { Notification } from '@/app/types/notification';
 import { NotificationAPI } from '@/serverAPI/NotificationAPI';
+import Theme from '@/appTheme';
+import { Button } from 'react-native-paper';
 
 interface NotificationModalProps {
   isVisible: boolean;
@@ -45,11 +47,11 @@ const NotificationModal = (props: NotificationModalProps) => {
       style={styles.modal}
     >
       <View style={styles.container}>
-        <Text style={styles.title}>Notifications</Text>
+        <Text style={styles.title}>Hi it's Skyler!</Text>
         {notifications.map((notification) => 
-          <div key={notification._id}>
-            <button onClick={() => removeNotification(notification._id)}>x</button>
-            <Text>{notification.workout}</Text>
+          <div key={notification._id} style={styles.notification}>
+            <Text>{`Workout Reminder for Today (${notification.date}) - ${notification.workout}`}</Text>
+            <Button onPress={() => removeNotification(notification._id)}>x</Button>
           </div>
         )}
       </View>
@@ -74,8 +76,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
-    marginTop: 40
+    marginBottom: 30,
+    marginTop: 10,
+    color: Theme.colors.themeColor
+  },
+  notification: {
+    display: 'flex',
+    marginBottom: 20
   },
 });
 
