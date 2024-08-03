@@ -7,7 +7,7 @@ const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 
-export default function EditWorkout({plan, setPlan, workout, setWorkout, modalVisible, setModalVisible}: 
+export default function workoutFeedback({plan, setPlan, workout, setWorkout, modalVisible, setModalVisible}: 
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
         workout: Workout, setWorkout: React.Dispatch<React.SetStateAction<Workout>>, 
         modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
