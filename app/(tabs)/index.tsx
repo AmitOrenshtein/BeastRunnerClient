@@ -1,27 +1,9 @@
 import HomePageCard from "@/components/HomePage/HomeScreenCard";
 import { router } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
-// import { PlanAPI } from "@/serverAPI/PlanAPI";
-// import { Gender } from "../types/userFitness";
 
 export default function HomePage() {
   const userName = 'User';
-
-// EXAMPLE for how to use api
-
-  //   useEffect(() => {
-  //     const generatePlan = async () => {
-  //       const plan = await PlanAPI.generatePlan({
-  //         age: 24,
-  //         gender: Gender.male,
-  //         height: 180,
-  //         weight: 70,
-  //       });
-
-  //       // handle plan result
-  //       generatePlan();
-  //     };
-  //   }, []);
 
   return (
     <View style={styles.container}>

@@ -1,10 +1,12 @@
 import { Text, View, StyleSheet } from "react-native";
 import CreateNewPlan from "../CreateNewPlan";
+import MyStats from "../MyStats";
 
 export default function MyTraining() {
     return (
         <View style={styles.container}>
-            <CreateNewPlan />
+            {/* <CreateNewPlan /> */}
+            <MyStats />
         </View>
     );
 };
