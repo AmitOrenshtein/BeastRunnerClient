@@ -42,15 +42,13 @@ export const BasicTimeline = () => {
               </View>
               { !moment().isBefore(workout.date) &&
                 <View style={{...styles.row, marginTop: 6}}>
-                  {workout.completedDistance && workout.completedDistance && 
+                  {workout.completedDistance && workout.completedDistance ? 
                     <Text style={{fontSize: 12, color: '#077a28'}}>
                     {workout.completedTime}" | {workout.completedDistance} KM
-                    </Text>}
-                  <Pressable style={{marginTop:6}} onPress={() => {setEditedWorkout(workout); setFeedbackModalVisible(true)}}>
-                    <Text style={{fontSize: 12, color: '#999', marginBottom: 7}}>
-                        feedback
-                    </Text>
-                  </Pressable>
+                    </Text> : <Text></Text>}
+                    <Button textColor="white" style={{backgroundColor:"gray", borderRadius:4}} onPress={() => {setEditedWorkout(workout); setFeedbackModalVisible(true)}}>
+                    feedback
+                    </Button>
                 </View>
               }
           </View>
