@@ -1,84 +1,70 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
-// import {Timeline} from "react-native-just-timeline";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { WeeklyPlan, Workout } from "../types/training";
-import { TimelineObject } from "../types/timeline";
 import EditWorkout from "./EditWorkout";
 const { width, height } = Dimensions.get('window');
 import { Icon } from 'react-native-elements';
+import { Card, Button } from 'react-native-paper';
+import WorkoutFeedback from "./workoutFeedback";
 
 export const BasicTimeline = () => {
-    const [modalVisible, setModalVisible] = useState<boolean>(false)
+    const [editPlanModalVisible, setEditPlanModalVisible] = useState<boolean>(false);
+    const [feedbackModalVisible, setFeedbackModalVisible] = useState<boolean>(false);
     const [editedWorkout, setEditedWorkout] = useState<Workout>({date: new Date(), workout: ""});
     const [plan, setPlan] = useState<WeeklyPlan[]>([]);
-    const [workouts, setWorkouts] = useState<TimelineObject[]>([]);
 
-    const formatToTimeline = (workout: Workout):TimelineObject | any => {
-      return ({
-        title: () => (
-          <View style={{width:'100%'}}>
-            <Text style={{fontSize: 10, color: '#999', marginBottom: 7}}>
-              daily workout plan:
-            </Text>
-            <View style={styles.row}>
-              <Text style={{marginBottom: 0, color: '#5384cf'}}>
-                {workout.workout}
-              </Text>
-              {moment().isBefore(workout.date) ? 
-              <Pressable onPress={() => {setEditedWorkout(workout); setModalVisible(true)}}>
-                  <Icon name='edit' />
-              </Pressable> : 
+    useEffect(() => {
+      PlanAPI.getPlan().then((res) => {
+        setPlan(res.data.plan)
+      })
+  }, []);
+
+    const cardsList = () => {
+      return(<>
+      {plan.map((week) => week.days).flat().map((workout) => (
+        <View style={{flexDirection:"row", width:"100vw"}} key={workout.date.toString()}>
+        <Text style={styles.dateText}>
+          {moment(workout.date).format('ll')}
+        </Text>
+          <Card style={styles.card}>
+            <Card.Content>
+            <View style={{width:'100%'}}>
               <View style={styles.row}>
-                <Pressable style={{marginHorizontal:4}} onPress={() => {setEditedWorkout(workout); setModalVisible(true)}}>
-                <Text style={{fontSize: 14, color: '#999', marginBottom: 7}}>
-                   feedback
+                <Text style={{fontSize: 13, color: '#5384cf'}}>
+                  {workout.workout}
                 </Text>
-                </Pressable>
-                <Text style={{fontSize: 14, color: '#999', marginBottom: 7}}>
-                   feedback
-                </Text>
+                {moment().isBefore(workout.date) && 
+                <Pressable onPress={() => {setEditedWorkout(workout); setEditPlanModalVisible(true)}}>
+                    <Icon name='edit' />
+                </Pressable>}
               </View>
+              { !moment().isBefore(workout.date) &&
+                <View style={{...styles.row, marginTop: 6}}>
+                  {workout.completedDistance && workout.completedDistance ? 
+                    <Text style={{fontSize: 12, color: '#077a28'}}>
+                    {workout.completedTime}" | {workout.completedDistance} KM
+                    </Text> : <Text></Text>}
+                    <Button textColor="white" style={{backgroundColor:"gray", borderRadius:4}} onPress={() => {setEditedWorkout(workout); setFeedbackModalVisible(true)}}>
+                    feedback
+                    </Button>
+                </View>
               }
-            </View>
           </View>
-        ),
-        time: {
-          content: moment(workout.date).format('ll'),
-          style: {
-            paddingTop: 8,
-          },
-        },
-        icon: {
-          content: 'check',
-          style: {
-            width: 35,
-            height: 35,
-            backgroundColor: '#5384cf',
-            color: '#FFF',
-            borderColor: '#FFF',
-            fontSize: 16,
-            paddingTop: 6,
-            borderRadius: 18,
-          },
-        },
-      });
+            </Card.Content>
+          </Card>
+        </View>
+      ))}
+      </>)
     }
     
-    useEffect(() => {
-        PlanAPI.getPlan().then((res) => {
-          setPlan(res.data.plan)
-          const workouts:TimelineObject[] = []
-          res.data.plan.forEach((week) => week.days.forEach(day => workouts.push(formatToTimeline(day))))
-          setWorkouts(workouts)})
-    }, []);
-  
     return (
       <>
-        {/* <Timeline data={workouts}  /> */}
-        <EditWorkout plan={plan} setPlan={setPlan} modalVisible={modalVisible} setWorkout={setEditedWorkout} setModalVisible={setModalVisible} workout={editedWorkout}/>
-        </>
+      {cardsList()}
+        <EditWorkout plan={plan} setPlan={setPlan} modalVisible={editPlanModalVisible} setModalVisible={setEditPlanModalVisible} workout={editedWorkout}/>
+        <WorkoutFeedback plan={plan} setPlan={setPlan} modalVisible={feedbackModalVisible} setModalVisible={setFeedbackModalVisible} workout={editedWorkout}/>
+      </>
     );
   };
   
@@ -90,7 +76,17 @@ export const BasicTimeline = () => {
       justifyContent:"space-between",
       flexDirection:"row",
     },
+    dateText: {
+      width:"100%",
+      maxWidth:width * 0.3,
+      color:"gray", 
+      fontSize: 12,
+      margin: 10
+    },
+    card: {
+      borderRadius:3,
+      marginVertical:4,
+      width:"100%",
+      maxWidth:width * 0.7
+      }
   });
-
-
-  // "react-native-just-timeline": "^0.0.2",
