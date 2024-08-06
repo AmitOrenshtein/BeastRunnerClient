@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Image, StyleSheet, View } from 'react-native';
-import { Header } from 'react-native-elements';
+import { Header, Badge, Avatar } from 'react-native-elements';
 import appTheme from '../appTheme';
 import NotificationModal from '../components/NotificationsModal'; 
+import { NotificationAPI } from '@/serverAPI/NotificationAPI';
 
 const styles = StyleSheet.create({
   title: {
@@ -23,22 +24,42 @@ const styles = StyleSheet.create({
 
 export default function AppHeader() {
   const [isModalVisible, setModalVisible] = useState(false);
+  const [notificationsNumber, setNotificationsNumber] = useState(0);
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
+
+  const fetchNotificationsNumber = async () => {
+    await NotificationAPI.getNotificationsNumber().then((res) => {
+      setNotificationsNumber(res.data)
+    });
+  }
+
+  useEffect(() => {
+    fetchNotificationsNumber();
+
+    const intervalId = setInterval(fetchNotificationsNumber, 15000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <View style={styles.headerContainer}>
       <Header
         backgroundColor={appTheme.colors.themeColor}
         leftComponent={
-          <TouchableOpacity onPress={toggleModal}>
-            <Image
-              source={require('../assets/assistent.png')}
-              style={styles.notifications}
-            />
-          </TouchableOpacity>
+          <>
+          
+            <TouchableOpacity onPress={toggleModal}>
+              <Image
+                source={require('../assets/assistent.png')}
+                style={styles.notifications}
+              />
+            <Badge value={notificationsNumber} status="error" containerStyle={{ position: 'absolute', top: -4, right: 1 }} />
+            </TouchableOpacity>
+          
+          </>
         }
         centerComponent={{ 
           text: 'Beast Runner', 
@@ -49,7 +70,7 @@ export default function AppHeader() {
           color: appTheme.colors.white 
         }}
       />
-      <NotificationModal isVisible={isModalVisible} onClose={toggleModal} />
+      <NotificationModal isVisible={isModalVisible} onClose={toggleModal} setNotificationsNumber={setNotificationsNumber}/>
     </View>
   );
 }
