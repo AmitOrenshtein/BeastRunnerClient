@@ -57,6 +57,14 @@ export default function TabsLayout() {
                     href: null,
                 }}
             />
+            <Tabs.Screen
+                name="GoogleLogin"
+                options={{
+                    headerShown: false,
+                    title: 'Login',
+                    tabBarIcon: () => <Feather name='list' size={24} color={appTheme.colors.themeColor} />
+                }}
+            />
         </Tabs>
     )
 }

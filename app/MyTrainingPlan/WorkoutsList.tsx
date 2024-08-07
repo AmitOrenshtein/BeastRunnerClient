@@ -1,7 +1,7 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
-import {Timeline} from "react-native-just-timeline";
+// import {Timeline} from "react-native-just-timeline";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { WeeklyPlan, Workout } from "../types/training";
 import { TimelineObject } from "../types/timeline";
@@ -64,7 +64,7 @@ export const BasicTimeline = () => {
   
     return (
       <>
-        <Timeline data={workouts}  />
+        {/*<Timeline data={workouts}  />*/}
         <EditWorkout plan={plan} setPlan={setPlan} modalVisible={modalVisible} setWorkout={setEditedWorkout} setModalVisible={setModalVisible} workout={editedWorkout}/>
         </>
     );
