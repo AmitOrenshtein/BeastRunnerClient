@@ -8,13 +8,13 @@ export default function TabsLayout() {
     return (
         <Tabs>      
             <Tabs.Screen
-                name="MyTrainings"
+                name="MyTrainingPlan"
                 options={{
                     headerShown: false,
-                    title: 'My trainings',
+                    title: 'My training plan',
                     tabBarIcon: () => <Feather name='list' size={24} color={appTheme.colors.themeColor} />
                 }}
-            />      
+            />
             <Tabs.Screen
                 name="index"
                 options={{
@@ -29,15 +29,6 @@ export default function TabsLayout() {
                     headerShown: false,
                     title: 'Personal Info',
                     tabBarIcon: () => <AntDesign name='edit' size={24} color={appTheme.colors.themeColor} />
-                }}
-            />
-            
-            <Tabs.Screen
-                name="MyTrainingPlan"
-                options={{
-                    headerShown: false,
-                    title: 'My training plan',
-                    href: null,
                 }}
             />
             
