@@ -1,12 +1,21 @@
-import {Text, View, StyleSheet, Button} from "react-native";
-import {GoogleSignin, GoogleSigninButton, statusCodes, User} from "@react-native-google-signin/google-signin";
+import {Button, StyleSheet, Text, View} from "react-native";
+import {GoogleSignin, GoogleSigninButton} from "@react-native-google-signin/google-signin";
 import {useEffect, useState} from "react";
-import GoogleFit, {BucketUnit, Scopes} from 'react-native-google-fit';
+import GoogleFit, {Scopes} from 'react-native-google-fit';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
-import googleFit from "react-native-google-fit";
+import {
+    clearAllDataFromAsyncStorage,
+    saveAccessTokenInAsyncStorage,
+    saveIdTokenInAsyncStorage,
+    saveRefreshTokenInAsyncStorage,
+    saveUserIdInAsyncStorage
+} from "@/app/utils/AsyncStorageUtil";
+import {googleSignin, logoutFromServer} from "@/serverAPI/AuthAPI";
+import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
 
 export default function GoogleLogin() {
+    const {accessTokenState,userIdState,setUserId, setAccessToken} = useAccessTokenAndUserId();
     const [idToken, setIdToken] = useState<string>();
     const {getAllDailyRunningSessions,
         getAllDailyWalkingSessions,
@@ -25,10 +34,10 @@ export default function GoogleLogin() {
                 'https://www.googleapis.com/auth/fitness.reproductive_health.read',
                 'https://www.googleapis.com/auth/fitness.heart_rate.read'
             ],
-            // @ts-ignore // androidClientId must annotate with ts-ignore!!!
-            androidClientId: "your_androidClientId",//todo: put in env file,
-            webClientId: 'your_webClientId', //todo: put in env file,
-            iosClientId: "your_iosClientId",//todo: put in env file,
+            // @ts-ignore
+            androidClientId: "your_androidClientId",//todo: get from env file,
+            webClientId: 'your_webClientId', //todo: get from env file,
+            iosClientId: "your_iosClientId",//todo: get from env file,
         });
     }
 
@@ -53,9 +62,15 @@ export default function GoogleLogin() {
 
     const checkIfUserIsSignedIn = async (): Promise<boolean> => {
         const idToken = await AsyncStorage.getItem('idToken');
-        if (idToken) {
+        if (idToken && accessTokenState && userIdState) {
             setIdToken(idToken);
-            await fetchGoogleFitData();
+            await configureGoogleFit();
+            if(GoogleFit.isAuthorized){
+                await fetchGoogleFitData();
+            } else {
+                alert("you have idToken but you are not authorized to googlefit....")
+            }
+
             return true;
         }
         return false;
@@ -79,38 +94,27 @@ export default function GoogleLogin() {
         try {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
-            console.log("usere info: ",userInfo);
-            setIdToken(userInfo.idToken ? userInfo.idToken : undefined);
+            console.log("user info: ",userInfo);
             if (userInfo.idToken) {
                 console.log("save new idToken in storage...");
-                await AsyncStorage.setItem('idToken', userInfo.idToken);
-                getTokensFromServer(userInfo.idToken);
+                const res = await googleSignin(userInfo.idToken);
+                await saveIdTokenInAsyncStorage(userInfo.idToken);
+                console.log("access token: ", accessTokenState);
+                console.log("id token: ", idToken);
+                setIdToken(userInfo.idToken ? userInfo.idToken : undefined);
+                await saveAccessTokenInAsyncStorage(res.accessToken!);//todo: if undefine?
+                setAccessToken(res.accessToken!);
+                await saveRefreshTokenInAsyncStorage(res.refreshToken!);//todo: if undefine?
+                await (res._id! && saveUserIdInAsyncStorage(res._id!));//todo: if undefine?
+                setUserId(res._id!);
+                console.log("response:", res);
                 await configureGoogleFit();
                 await fetchGoogleFitData();
             }
         } catch (error) {
             console.log(JSON.stringify(error));
-            console.log("error");
+            console.log("Failed to sign-in with google account...");
         }
-    };
-
-    const getTokensFromServer =  (idToken: string) => {
-        console.log("getting access & refresh tokens from server...")
-        // try {
-        //     const response = await fetch('YOUR_SERVER_URL/token', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({ idToken }),
-        //     });
-        //     const { accessToken, refreshToken } = await response.json();
-        //     await AsyncStorage.setItem('accessToken', accessToken);
-        //     await AsyncStorage.setItem('refreshToken', refreshToken);
-        // } catch (error) {
-        //     console.log("Error getting tokens from server: ", error);
-        //     setError("Error getting tokens from server: " + error);
-        // }
     };
 
     const fetchGoogleFitData = async () => {
@@ -135,24 +139,15 @@ export default function GoogleLogin() {
             getAverageHeartRate(startTime, endTime).then(res => console.log("heart_rate: ",res));
         } catch (error) {
             console.log("Google Fit data fetch error: ", error);
-            // setError("Google Fit data fetch error: " + error);
         }
     };
 
-    const logout = () => {
-        setIdToken(undefined);
-        //Todo: remove all 3 tokens (id, refresh, access) and call logout from server
-        GoogleSignin.revokeAccess();
-        GoogleSignin.signOut();
-    }
 
     return (
         <View style={styles.container}>
             <Text>Google Login screen</Text>
             {idToken && <Text>{JSON.stringify(idToken)}</Text>}
-            {idToken ? (
-                <Button title="Logout" onPress={logout}/>
-            ) : (
+            {!idToken &&  (
                 <GoogleSigninButton size={GoogleSigninButton.Size.Standard} color={GoogleSigninButton.Color.Dark}
                                     onPress={signIn}/>
             )}
