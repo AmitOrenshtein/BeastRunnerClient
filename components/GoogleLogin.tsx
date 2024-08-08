@@ -1,9 +1,10 @@
-import {Button, StyleSheet, Text, View} from "react-native";
-import {GoogleSignin, GoogleSigninButton} from "@react-native-google-signin/google-signin";
+import {Image, StyleSheet, View} from "react-native";
+import {Button, Text} from "react-native-paper"
+import {GoogleSignin} from "@react-native-google-signin/google-signin";
 import {useEffect, useState} from "react";
 import GoogleFit, {Scopes} from 'react-native-google-fit';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {useGoogleFit} from "@/app/context/GoogleFitContext";
+import Theme from "@/appTheme";
 import {
     clearAllDataFromAsyncStorage,
     saveAccessTokenInAsyncStorage,
@@ -11,19 +12,12 @@ import {
     saveRefreshTokenInAsyncStorage,
     saveUserIdInAsyncStorage
 } from "@/app/utils/AsyncStorageUtil";
-import {googleSignin, logoutFromServer} from "@/serverAPI/AuthAPI";
+import {googleSignin} from "@/serverAPI/AuthAPI";
 import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
 
 export default function GoogleLogin() {
-    const {accessTokenState,userIdState,setUserId, setAccessToken} = useAccessTokenAndUserId();
-    const [idToken, setIdToken] = useState<string>();
-    const {getAllDailyRunningSessions,
-        getAllDailyWalkingSessions,
-        getDailyDistance,
-        getDailyMovementMinutes,
-        getDailyStepsNumber,
-        getCurrentWeight,
-        getCurrentHeight, getAverageHeartRate} = useGoogleFit();
+    const {accessTokenState, userIdState, setUserId, setAccessToken} = useAccessTokenAndUserId();
+    const [isGoogleFitAndAccountAreConnected, setIsGoogleFitAndAccountAreConnected] = useState<boolean>(false);
 
     const configureGoogleSignIn = () => {
         GoogleSignin.configure({
@@ -61,19 +55,33 @@ export default function GoogleLogin() {
     };
 
     const checkIfUserIsSignedIn = async (): Promise<boolean> => {
-        const idToken = await AsyncStorage.getItem('idToken');
-        if (idToken && accessTokenState && userIdState) {
-            setIdToken(idToken);
-            await configureGoogleFit();
-            if(GoogleFit.isAuthorized){
-                await fetchGoogleFitData();
-            } else {
-                alert("you have idToken but you are not authorized to googlefit....")
-            }
+        try {
+            const idToken = await AsyncStorage.getItem('idToken');
+            if (idToken && accessTokenState && userIdState) {
+                console.log("Already signin to google (have idToken && accessTokenState && userIdState)")
+                // setIdToken(idToken);
+                await configureGoogleFit();
+                if (GoogleFit.isAuthorized) {
+                    console.log("GoogleFit.isAuthorized is true also :)")
+                    setIsGoogleFitAndAccountAreConnected(true);
+                    return true;
+                    // await fetchGoogleFitData();
+                } else {
+                    alert("you have idToken but you are not authorized to googlefit....")
+                    setIsGoogleFitAndAccountAreConnected(false);
+                    return false;
+                }
 
-            return true;
+            }
+            console.log("You are not signin to google... needs to sign in")
+            setIsGoogleFitAndAccountAreConnected(false);
+            return false;
+        } catch (err) {
+            console.log("Failed to check if you are signin or not... error: ", err);
+            setIsGoogleFitAndAccountAreConnected(false);
+            return false;
         }
-        return false;
+
     };
 
     useEffect(() => {
@@ -94,14 +102,14 @@ export default function GoogleLogin() {
         try {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
-            console.log("user info: ",userInfo);
+            console.log("user info: ", userInfo);
             if (userInfo.idToken) {
-                console.log("save new idToken in storage...");
                 const res = await googleSignin(userInfo.idToken);
+                console.log("save new idToken in storage...");
                 await saveIdTokenInAsyncStorage(userInfo.idToken);
                 console.log("access token: ", accessTokenState);
-                console.log("id token: ", idToken);
-                setIdToken(userInfo.idToken ? userInfo.idToken : undefined);
+                console.log("id token: ", userInfo.idToken);
+                // setIdToken(userInfo.idToken ? userInfo.idToken : undefined);
                 await saveAccessTokenInAsyncStorage(res.accessToken!);//todo: if undefine?
                 setAccessToken(res.accessToken!);
                 await saveRefreshTokenInAsyncStorage(res.refreshToken!);//todo: if undefine?
@@ -109,48 +117,37 @@ export default function GoogleLogin() {
                 setUserId(res._id!);
                 console.log("response:", res);
                 await configureGoogleFit();
-                await fetchGoogleFitData();
+                // await fetchGoogleFitData();
             }
         } catch (error) {
             console.log(JSON.stringify(error));
             console.log("Failed to sign-in with google account...");
+            //////////////////todo:???
+            GoogleSignin.revokeAccess();
+            GoogleSignin.signOut();
+            clearAllDataFromAsyncStorage();
         }
     };
-
-    const fetchGoogleFitData = async () => {
-        try {
-            const startTime = '2023-01-01T00:00:17.971Z';
-            const endTime = new Date().toISOString();
-            // getCurrentHeight(startTime, endTime).then(res => setGoogleFitData(res.pop()?.value || 0));
-            // getCurrentWeight(startTime, endTime).then(res => alert("weight: "+res));
-            // getDailyDistance(startTime, endTime).then(res => console.log("distance: ",res));
-            // getDailyStepsNumber(startTime, endTime).then(res => console.log("steps: ",res));
-            // getDailyMovementMinutes(startTime, endTime).then(res => console.log("movement_minutes: ",res));
-            // getAllDailyRunningSessions(startTime, endTime).then(res => console.log("running sessions: ",res));
-            // getAllDailyWalkingSessions(startTime, endTime).then(res => console.log("walking sessions: ",res));
-            // getAverageHeartRate(startTime, endTime).then(res => console.log("heart_rate: ",res));
-            getCurrentHeight(startTime, endTime).then(res => console.log("height: ",res));
-            getCurrentWeight(startTime, endTime).then(res => console.log("weight: ",res));
-            getDailyDistance(startTime, endTime).then(res => console.log("distance: ",res));
-            getDailyStepsNumber(startTime, endTime).then(res => console.log("steps: ",res));
-            getDailyMovementMinutes(startTime, endTime).then(res => console.log("movement_minutes: ",res));
-            getAllDailyRunningSessions(startTime, endTime).then(res => console.log("running sessions: ",res));
-            getAllDailyWalkingSessions(startTime, endTime).then(res => console.log("walking sessions: ",res));
-            getAverageHeartRate(startTime, endTime).then(res => console.log("heart_rate: ",res));
-        } catch (error) {
-            console.log("Google Fit data fetch error: ", error);
-        }
-    };
-
 
     return (
-        <View style={styles.container}>
-            <Text>Google Login screen</Text>
-            {idToken && <Text>{JSON.stringify(idToken)}</Text>}
-            {!idToken &&  (
-                <GoogleSigninButton size={GoogleSigninButton.Size.Standard} color={GoogleSigninButton.Color.Dark}
-                                    onPress={signIn}/>
-            )}
+        !isGoogleFitAndAccountAreConnected && <View style={styles.container}>
+            <Image
+                source={require('@/assets/runnerLogo.jpg')}
+                style={styles.logo}
+            />
+            <Text style={styles.title}>Run your way to your goals!</Text>
+            <Text style={styles.subtitle}>Welcome to Beast Runner!</Text>
+            <Text style={styles.subtitle}>Already training with us?</Text>
+            <Text style={styles.subtitle}>Log in or join now!</Text>
+
+            <Button
+                mode="contained"
+                onPress={signIn}
+                style={styles.signInButton}
+                contentStyle={styles.signInButtonContent}
+                labelStyle={styles.signInButtonText}>
+                JOIN US OR SIGN IN
+            </Button>
 
         </View>
     );
@@ -161,6 +158,41 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingHorizontal: 16,
+        backgroundColor: Theme.colors.white,
+        marginTop: -100,
+    },
+    logo: {
+        width: 120,
+        height: 120,
+        marginBottom: 8,
+    },
+    title: {
+        fontSize: 15,
+        fontStyle: "italic",
+        color: Theme.colors.themeColor,
+        fontWeight: 'bold',
+        marginBottom: 50,
+    },
+    subtitle: {
+        fontSize: 24,
+        color: 'black',
+        marginBottom: 10,
+        textAlign: 'center',
+        fontWeight: 'bold'
+    },
+    signInButton: {
+        position: 'absolute',
+        bottom: 60,
+        alignSelf: 'center',
+        backgroundColor: Theme.colors.themeColor,
+    },
+    signInButtonContent: {
+        height: 60,
+        width: 300,
+    },
+    signInButtonText: {
+        fontSize: 20,
     },
 });
 

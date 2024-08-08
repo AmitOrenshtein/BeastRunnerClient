@@ -8,6 +8,7 @@ import {
 } from "@/app/utils/AsyncStorageUtil";
 
 export const googleSignin = (idToken: string) => {
+    console.log("In googleSignin server func...")
     return new Promise<IUser>((resolve, reject) => {
         api.post("/auth/google", {idToken: idToken})
             .then((response) => resolve(response.data))

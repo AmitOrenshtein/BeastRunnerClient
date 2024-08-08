@@ -7,8 +7,9 @@ const headers = {
 };
 
 const api = axios.create({
-    // baseURL: process.env.RAECT_APP_SERVER_URL || "http://localhost:8000/",//TODO:!!!
-    baseURL: process.env.RAECT_APP_SERVER_URL || 'http://YOUR_COMPUTER_IP:8000/',// YOUR_COMPUTER_IP when running on physical device,
+    // baseURL: "http://localhost:8000/",//TODO:!!!
+    baseURL: 'http://YOUR_COMPUTER_IP:8000/',// YOUR_COMPUTER_IP when running on physical device,
+
     headers: {...headers}
 });
 
