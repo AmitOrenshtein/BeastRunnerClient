@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
 });
 
 export default function AppHeader() {
-    const { accessTokenState, userIdState, setAccessToken, setUserId } = useAccessTokenAndUserId();
+    const {accessTokenState, userIdState, setAccessToken, setUserId} = useAccessTokenAndUserId();
     const [isModalVisible, setModalVisible] = useState(false);
 
     const toggleModal = () => {
@@ -39,21 +39,19 @@ export default function AppHeader() {
         try {
             await logoutFromServer();
             await clearAllDataFromAsyncStorage();
-            await GoogleSignin.revokeAccess();
+            await GoogleSignin.revokeAccess();//TODO: check about the premissions
             await GoogleSignin.signOut();
             setAccessToken(null);
             setUserId(null);
-            // navigate('/');//TODO: if new user? if exist user?
             console.log("user is now Logout");
             alert("user is now Logout");
         } catch (error) {
-            console.log("Failed in logout");
-            console.log(error);
+            console.log("Failed in logout.. error: ", error);
             alert("Failed in logout");
         }
     }
 
-    const getMenuItems : GenericMenuItemProps[] = [{title:'Logout', keepMenuOpen: false, onItemPress: handleLogout}]//Add All Items Here!!
+    const getMenuItems: GenericMenuItemProps[] = [{title: 'Logout', keepMenuOpen: false, onItemPress: handleLogout}]//Add All Items Here!!
 
     return (
         <View style={styles.headerContainer}>
@@ -71,18 +69,18 @@ export default function AppHeader() {
                         }
                         centerComponent={{
                             text: 'Beast Runner',
-                            style: { ...styles.title }
+                            style: {...styles.title}
                         }}
                         rightComponent={<GenericMenu menuItems={getMenuItems}/>}
                     />
-                    <NotificationModal isVisible={isModalVisible} onClose={toggleModal} />
+                    <NotificationModal isVisible={isModalVisible} onClose={toggleModal}/>
                 </>
             ) : (
                 <Header
                     backgroundColor={appTheme.colors.themeColor}
                     centerComponent={{
                         text: 'Beast Runner',
-                        style: { ...styles.title }
+                        style: {...styles.title}
                     }}
                 />
             )}

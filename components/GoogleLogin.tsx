@@ -1,9 +1,7 @@
 import {Image, StyleSheet, View} from "react-native";
 import {Button, Text} from "react-native-paper"
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
-import {useEffect, useState} from "react";
-import GoogleFit, {Scopes} from 'react-native-google-fit';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useEffect} from "react";
 import Theme from "@/appTheme";
 import {
     clearAllDataFromAsyncStorage,
@@ -14,10 +12,11 @@ import {
 } from "@/app/utils/AsyncStorageUtil";
 import {googleSignin} from "@/serverAPI/AuthAPI";
 import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
+import {useGoogleFit} from "@/app/context/GoogleFitContext";
 
 export default function GoogleLogin() {
-    const {accessTokenState, userIdState, setUserId, setAccessToken} = useAccessTokenAndUserId();
-    const [isGoogleFitAndAccountAreConnected, setIsGoogleFitAndAccountAreConnected] = useState<boolean>(false);
+    const {setUserId, setAccessToken} = useAccessTokenAndUserId();
+    const {configureGoogleFit} = useGoogleFit();
 
     const configureGoogleSignIn = () => {
         GoogleSignin.configure({
@@ -35,64 +34,9 @@ export default function GoogleLogin() {
         });
     }
 
-    const configureGoogleFit = async () => {
-
-        const options = {
-            scopes: [
-                Scopes.FITNESS_ACTIVITY_READ,
-                Scopes.FITNESS_BODY_READ,
-                Scopes.FITNESS_LOCATION_READ,
-                Scopes.FITNESS_HEART_RATE_READ,
-                Scopes.FITNESS_REPRODUCTIVE_HEALTH_READ
-            ],
-        };
-        const result = await GoogleFit.authorize(options);
-        if (result.success) {
-            console.log("authorized successfully to google-fit");
-        } else {
-            console.log('Google Fit authorization failed');
-        }
-    };
-
-    const checkIfUserIsSignedIn = async (): Promise<boolean> => {
-        try {
-            const idToken = await AsyncStorage.getItem('idToken');
-            if (idToken && accessTokenState && userIdState) {
-                console.log("Already signin to google (have idToken && accessTokenState && userIdState)")
-                // setIdToken(idToken);
-                await configureGoogleFit();
-                if (GoogleFit.isAuthorized) {
-                    console.log("GoogleFit.isAuthorized is true also :)")
-                    setIsGoogleFitAndAccountAreConnected(true);
-                    return true;
-                    // await fetchGoogleFitData();
-                } else {
-                    alert("you have idToken but you are not authorized to googlefit....")
-                    setIsGoogleFitAndAccountAreConnected(false);
-                    return false;
-                }
-
-            }
-            console.log("You are not signin to google... needs to sign in")
-            setIsGoogleFitAndAccountAreConnected(false);
-            return false;
-        } catch (err) {
-            console.log("Failed to check if you are signin or not... error: ", err);
-            setIsGoogleFitAndAccountAreConnected(false);
-            return false;
-        }
-
-    };
 
     useEffect(() => {
-        const initialize = async () => {
-            const isSignedIn = await checkIfUserIsSignedIn();
-            if (!isSignedIn) {
-                configureGoogleSignIn();
-            }
-        };
-
-        initialize();
+        configureGoogleSignIn();
     }, []);
 
 
@@ -107,9 +51,7 @@ export default function GoogleLogin() {
                 const res = await googleSignin(userInfo.idToken);
                 console.log("save new idToken in storage...");
                 await saveIdTokenInAsyncStorage(userInfo.idToken);
-                console.log("access token: ", accessTokenState);
                 console.log("id token: ", userInfo.idToken);
-                // setIdToken(userInfo.idToken ? userInfo.idToken : undefined);
                 await saveAccessTokenInAsyncStorage(res.accessToken!);//todo: if undefine?
                 setAccessToken(res.accessToken!);
                 await saveRefreshTokenInAsyncStorage(res.refreshToken!);//todo: if undefine?
@@ -117,12 +59,10 @@ export default function GoogleLogin() {
                 setUserId(res._id!);
                 console.log("response:", res);
                 await configureGoogleFit();
-                // await fetchGoogleFitData();
             }
         } catch (error) {
-            console.log(JSON.stringify(error));
             console.log("Failed to sign-in with google account...");
-            //////////////////todo:???
+            console.log(JSON.stringify(error));
             GoogleSignin.revokeAccess();
             GoogleSignin.signOut();
             clearAllDataFromAsyncStorage();
@@ -130,7 +70,7 @@ export default function GoogleLogin() {
     };
 
     return (
-        !isGoogleFitAndAccountAreConnected && <View style={styles.container}>
+        <View style={styles.container}>
             <Image
                 source={require('@/assets/runnerLogo.jpg')}
                 style={styles.logo}

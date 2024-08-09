@@ -5,12 +5,13 @@ import GoogleFit, {
     BucketUnit,
     DistanceResponse,
     HeightResponse,
-    MoveMinutesResponse,
+    MoveMinutesResponse, Scopes,
     StepsResponse,
     WeightResponse
 } from 'react-native-google-fit';
 
 interface GoogleFitContextProps {
+    configureGoogleFit: () => Promise<boolean>;
     getDailyStepsNumber: (startDate: string, endDate: string) => Promise<StepsResponse[]>;
     getDailyDistance: (startDate: string, endDate: string) => Promise<DistanceResponse[]>;
     getAllDailyRunningSessions: (startDate: string, endDate: string) => Promise<RunningSession[]>;
@@ -38,6 +39,26 @@ interface WalkingSession {
 }
 
 const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
+    const configureGoogleFit = async () => {
+
+        const options = {
+            scopes: [
+                Scopes.FITNESS_ACTIVITY_READ,
+                Scopes.FITNESS_BODY_READ,
+                Scopes.FITNESS_LOCATION_READ,
+                Scopes.FITNESS_HEART_RATE_READ,
+                Scopes.FITNESS_REPRODUCTIVE_HEALTH_READ
+            ],
+        };
+        const result = await GoogleFit.authorize(options);
+        if (result.success) {
+            console.log("authorized successfully to google-fit");
+            return true;
+        } else {
+            console.log('Google Fit authorization failed');
+            return false;
+        }
+    };
     const getDailyStepsNumber = async (startDate: string, endDate: string): Promise<StepsResponse[]> => {
         const opt = {
             startDate,
@@ -146,6 +167,7 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
     return (
         <GoogleFitContext.Provider
             value={{
+                configureGoogleFit,
                 getDailyStepsNumber,
                 getDailyDistance,
                 getAllDailyRunningSessions,

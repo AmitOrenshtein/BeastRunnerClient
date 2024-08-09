@@ -9,7 +9,6 @@ const headers = {
 const api = axios.create({
     // baseURL: "http://localhost:8000/",//TODO:!!!
     baseURL: 'http://YOUR_COMPUTER_IP:8000/',// YOUR_COMPUTER_IP when running on physical device,
-
     headers: {...headers}
 });
 

@@ -1,11 +1,13 @@
-import React, {createContext, ReactNode, useContext, useEffect, useState} from 'react';
+import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
 import {getAccessTokenFromAsyncStorage, getUserIdFromAsyncStorage} from "@/app/utils/AsyncStorageUtil";
+import {Text, View} from "react-native";
 
 interface AccessTokenAndUserIdContextProps {
     accessTokenState: string | null;
     setAccessToken: (token: string | null) => void;
     userIdState: string | null;
     setUserId: (userId: string | null) => void;
+    loading: boolean;
 }
 
 const AccessTokenAndUserIdContext = createContext<AccessTokenAndUserIdContextProps>({
@@ -14,45 +16,63 @@ const AccessTokenAndUserIdContext = createContext<AccessTokenAndUserIdContextPro
     },
     userIdState: null,
     setUserId: () => {
-    }
+    },
+    loading: true,
 });
 
 export const AccessTokenAndUserIdProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [accessTokenState, setAccessTokenState] = useState<string | null>(null);
     const [userIdState, setUserIdState] = useState<string | null>(null);
-
+    const [loading, setLoading] = useState<boolean>(true); // Loading state
 
     useEffect(() => {
         const loadAccessTokenAndUserId = async () => {
-            const token = await getAccessTokenFromAsyncStorage();
-            setAccessTokenState(token);
-            const userId = await getUserIdFromAsyncStorage();
-            setUserIdState(userId);
+            try {
+                console.log("Loading access token and user ID from AsyncStorage...");
+                const token = await getAccessTokenFromAsyncStorage();
+                const userId = await getUserIdFromAsyncStorage();
+
+                console.log("Access token loaded:", token);
+                console.log("User ID loaded:", userId);
+
+                setAccessTokenState(token);
+                setUserIdState(userId);
+            } catch (error) {
+                console.error("Failed to load access token and user ID:", error);
+            } finally {
+                console.log("Loading in Context has been finished");
+                setLoading(false); // Set loading to false when done
+            }
         };
+
         loadAccessTokenAndUserId();
     }, []);
 
-
-    const setAccessToken = async (token: string | null) => {
-        // (token !== null && token !== undefined && token !== "") ?
-        //     await saveAccessTokenInAsyncStorage(token) :
-        //     await clearAccessTokenFromAsyncStorage();
+    const setAccessToken = (token: string | null) => {
         setAccessTokenState(token);
     };
 
-    const setUserId = async (userId: string | null) => {
-        // (userId !== null && userId !== undefined && userId !== "") ?
-        //     await saveUserIdInAsyncStorage(userId) :
-        //     await clearUserIdFromAsyncStorage();
+    const setUserId = (userId: string | null) => {
         setUserIdState(userId);
     };
 
+    if (loading) {
+        // Render a loading spinner while loading
+        return <LoadingSpinner/>; // Replace with your loading component
+    }
+
     return (
         <AccessTokenAndUserIdContext.Provider
-            value={{accessTokenState, setAccessToken: setAccessToken, userIdState: userIdState, setUserId: setUserId}}>
+            value={{accessTokenState, setAccessToken, userIdState, setUserId, loading}}>
             {children}
         </AccessTokenAndUserIdContext.Provider>
     );
 };
 
 export const useAccessTokenAndUserId = () => useContext(AccessTokenAndUserIdContext);
+
+const LoadingSpinner = () => (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Loading...</Text>
+    </View>
+);

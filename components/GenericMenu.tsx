@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import {TouchableOpacity, Image, StyleSheet, View} from 'react-native';
 import {Menu, Provider} from 'react-native-paper';
 import {GenericMenuProps} from "@/app/types/menu";
