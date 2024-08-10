@@ -7,7 +7,7 @@ import GoogleFit, {
     HeightResponse,
     MoveMinutesResponse, Scopes,
     StepsResponse,
-    WeightResponse
+    WeightResponse, WorkoutSessionResponse
 } from 'react-native-google-fit';
 
 interface GoogleFitContextProps {
@@ -20,6 +20,7 @@ interface GoogleFitContextProps {
     getCurrentHeight: (startDate: string, endDate: string) => Promise<HeightResponse[]>;
     getDailyMovementMinutes: (startDate: string, endDate: string) => Promise<MoveMinutesResponse[]>;
     getAverageHeartRate: (startDate: string, endDate: string) => Promise<AggregatedHeartRateResponse[]>;
+    getWorkoutSessions: (startDate: string, endDate: string) => Promise<WorkoutSessionResponse[]|undefined>;
 }
 
 const GoogleFitContext = createContext<GoogleFitContextProps | undefined>(undefined);
@@ -58,6 +59,18 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
             console.log('Google Fit authorization failed');
             return false;
         }
+    };
+
+    const getWorkoutSessions = async (startDate: string, endDate: string): Promise<WorkoutSessionResponse[]|undefined> => {
+        const opt = {
+            startDate,
+            endDate,
+            bucketUnit: BucketUnit.DAY,
+            bucketInterval: 1,
+        };
+
+        const res = await GoogleFit.getWorkoutSession(opt);
+        return res;
     };
     const getDailyStepsNumber = async (startDate: string, endDate: string): Promise<StepsResponse[]> => {
         const opt = {
@@ -168,6 +181,7 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
         <GoogleFitContext.Provider
             value={{
                 configureGoogleFit,
+                getWorkoutSessions,
                 getDailyStepsNumber,
                 getDailyDistance,
                 getAllDailyRunningSessions,

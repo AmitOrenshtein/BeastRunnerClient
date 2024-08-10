@@ -9,10 +9,31 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import GoogleFit, {Scopes} from "react-native-google-fit";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
 import {useEffect} from "react";
-
+import {GoogleSignin} from "@react-native-google-signin/google-signin";
+import {requestActivityRecognitionPermission} from "@/app/utils/PermissionsUtil";
 export default function TabsLayout() {
     const {accessTokenState, userIdState} = useAccessTokenAndUserId();
     const {configureGoogleFit} = useGoogleFit();
+
+    useEffect(() => {
+        configureGoogleSignIn();
+        checkIfUserIsSignedIn();
+    }, []);
+    const configureGoogleSignIn = () => {
+        GoogleSignin.configure({
+            scopes: [
+                'https://www.googleapis.com/auth/fitness.activity.read',
+                'https://www.googleapis.com/auth/fitness.body.read',
+                'https://www.googleapis.com/auth/fitness.location.read',
+                'https://www.googleapis.com/auth/fitness.reproductive_health.read',
+                'https://www.googleapis.com/auth/fitness.heart_rate.read'
+            ],
+            // @ts-ignore
+            androidClientId: "your_androidClientId",//todo: get from env file,
+            webClientId: 'your_webClientId', //todo: get from env file,
+            iosClientId: "your_iosClientId",//todo: get from env file,
+        });
+    }
 
     const checkIfUserIsSignedIn = async (): Promise<boolean> => {
         try {
@@ -23,6 +44,11 @@ export default function TabsLayout() {
                 await configureGoogleFit();
                 if (GoogleFit.isAuthorized) {
                     console.log("GoogleFit.isAuthorized is true also :)")
+                    const hasPermission = await requestActivityRecognitionPermission();
+                    if (!hasPermission) {
+                        alert('Activity Recognition permission is required to track your workout sessions.');
+                        //todo: return false?????
+                    }
                     //setIsGoogleFitAndAccountAreConnected(true);
                     return true;
                     // await fetchGoogleFitData();
@@ -44,9 +70,6 @@ export default function TabsLayout() {
         }
     };
 
-    useEffect(() => {
-        checkIfUserIsSignedIn();
-    }, []);
 
     return (
         <>

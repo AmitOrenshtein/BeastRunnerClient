@@ -13,31 +13,11 @@ import {
 import {googleSignin} from "@/serverAPI/AuthAPI";
 import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
+import {requestActivityRecognitionPermission} from "@/app/utils/PermissionsUtil";
 
 export default function GoogleLogin() {
     const {setUserId, setAccessToken} = useAccessTokenAndUserId();
     const {configureGoogleFit} = useGoogleFit();
-
-    const configureGoogleSignIn = () => {
-        GoogleSignin.configure({
-            scopes: [
-                'https://www.googleapis.com/auth/fitness.activity.read',
-                'https://www.googleapis.com/auth/fitness.body.read',
-                'https://www.googleapis.com/auth/fitness.location.read',
-                'https://www.googleapis.com/auth/fitness.reproductive_health.read',
-                'https://www.googleapis.com/auth/fitness.heart_rate.read'
-            ],
-            // @ts-ignore
-            androidClientId: "your_androidClientId",//todo: get from env file,
-            webClientId: 'your_webClientId', //todo: get from env file,
-            iosClientId: "your_iosClientId",//todo: get from env file,
-        });
-    }
-
-
-    useEffect(() => {
-        configureGoogleSignIn();
-    }, []);
 
 
     const signIn = async () => {
@@ -59,6 +39,10 @@ export default function GoogleLogin() {
                 setUserId(res._id!);
                 console.log("response:", res);
                 await configureGoogleFit();
+                const hasPermission = await requestActivityRecognitionPermission();
+                if (!hasPermission) {
+                    alert('Activity Recognition permission is required to track your workout sessions.');
+                }
             }
         } catch (error) {
             console.log("Failed to sign-in with google account...");

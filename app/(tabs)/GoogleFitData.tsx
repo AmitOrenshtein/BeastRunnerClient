@@ -10,7 +10,7 @@ export default function GoogleFitData() {
     const [isAuthorizedToGoogleFit, setIsAuthorizedToGoogleFit] = useState(false);
     const [googleFitData, setGoogleFitData] = useState({});
     const {
-        getAllDailyRunningSessions,
+        getAllDailyRunningSessions,getWorkoutSessions,
         getAllDailyWalkingSessions,
         getDailyDistance,
         getDailyMovementMinutes,
@@ -73,6 +73,7 @@ export default function GoogleFitData() {
             // getAllDailyRunningSessions(startTime, endTime).then(res => console.log("running sessions: ",res));
             // getAllDailyWalkingSessions(startTime, endTime).then(res => console.log("walking sessions: ",res));
             // getAverageHeartRate(startTime, endTime).then(res => console.log("heart_rate: ",res));
+            getWorkoutSessions(startTime, endTime).then(res => console.log("workout sessions: ", res));
             getCurrentHeight(startTime, endTime).then(res => console.log("height: ", res));
             getCurrentWeight(startTime, endTime).then(res => console.log("weight: ", res));
             getDailyDistance(startTime, endTime).then(res => console.log("distance: ", res));
