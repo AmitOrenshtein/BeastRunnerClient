@@ -18,4 +18,10 @@ export enum Gender {
     startDate?: string;
     endDate?: string;
   }
-  
+
+export interface IUser {
+  email: string,
+  _id?: string,
+  accessToken?: string,
+  refreshToken?: string
+}
