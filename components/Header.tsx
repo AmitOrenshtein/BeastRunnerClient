@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {Header} from 'react-native-elements';
+import {Badge, Header} from 'react-native-elements';
 import appTheme from '../appTheme';
 import NotificationModal from '../components/NotificationsModal';
 import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
@@ -9,6 +9,7 @@ import {GenericMenuItemProps} from "@/app/types/menu";
 import {logoutFromServer} from "@/serverAPI/AuthAPI";
 import {clearAllDataFromAsyncStorage} from "@/app/utils/AsyncStorageUtil";
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
+import { NotificationAPI } from '@/serverAPI/NotificationAPI';
 
 const styles = StyleSheet.create({
     title: {
@@ -28,12 +29,27 @@ const styles = StyleSheet.create({
 });
 
 export default function AppHeader() {
-    const {accessTokenState, userIdState, setAccessToken, setUserId} = useAccessTokenAndUserId();
-    const [isModalVisible, setModalVisible] = useState(false);
+  const [notificationsNumber, setNotificationsNumber] = useState(0);
+  const {accessTokenState, userIdState, setAccessToken, setUserId} = useAccessTokenAndUserId();
+  const [isModalVisible, setModalVisible] = useState(false);
 
     const toggleModal = () => {
         setModalVisible(!isModalVisible);
     };
+
+    const fetchNotificationsNumber = async () => {
+      await NotificationAPI.getNotificationsNumber().then((res) => {
+        setNotificationsNumber(res.data)
+      });
+    }
+
+    useEffect(() => {
+      fetchNotificationsNumber();
+
+      const intervalId = setInterval(fetchNotificationsNumber, 60000);
+
+      return () => clearInterval(intervalId);
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -65,6 +81,7 @@ export default function AppHeader() {
                                     source={require('../assets/assistent.png')}
                                     style={styles.notifications}
                                 />
+                                <Badge value={notificationsNumber} status="error" containerStyle={{ position: 'absolute', top: -4, right: 1 }} />
                             </TouchableOpacity>
                         }
                         centerComponent={{
@@ -73,7 +90,7 @@ export default function AppHeader() {
                         }}
                         rightComponent={<GenericMenu menuItems={getMenuItems}/>}
                     />
-                    <NotificationModal isVisible={isModalVisible} onClose={toggleModal}/>
+                    <NotificationModal isVisible={isModalVisible} onClose={toggleModal} setNotificationsNumber={setNotificationsNumber}/>
                 </>
             ) : (
                 <Header
