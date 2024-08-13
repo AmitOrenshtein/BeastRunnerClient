@@ -1,19 +1,18 @@
 import {Tabs} from "expo-router";
-import {Ionicons} from '@expo/vector-icons';
-import {Feather} from '@expo/vector-icons';
-import {AntDesign} from '@expo/vector-icons';
+import {AntDesign, Feather, Ionicons} from '@expo/vector-icons';
 import appTheme from '../../appTheme'
 import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
 import GoogleLogin from "@/components/GoogleLogin";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import GoogleFit, {Scopes} from "react-native-google-fit";
+import GoogleFit from "react-native-google-fit";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
 import {useEffect} from "react";
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
 import {requestActivityRecognitionPermission} from "@/app/utils/PermissionsUtil";
+
 export default function TabsLayout() {
     const {accessTokenState, userIdState} = useAccessTokenAndUserId();
-    const {configureGoogleFit} = useGoogleFit();
+    const {configureGoogleFit, googleAccessTokenState} = useGoogleFit();
 
     useEffect(() => {
         configureGoogleSignIn();
@@ -38,8 +37,8 @@ export default function TabsLayout() {
     const checkIfUserIsSignedIn = async (): Promise<boolean> => {
         try {
             const idToken = await AsyncStorage.getItem('idToken');
-            if (idToken && accessTokenState && userIdState) {
-                console.log("Already signin to google (have idToken && accessTokenState && userIdState)")
+            if (idToken && accessTokenState && userIdState && googleAccessTokenState) {
+                console.log("Already signin to google (have idToken && accessTokenState && userIdState)");
                 // setIdToken(idToken);
                 await configureGoogleFit();
                 if (GoogleFit.isAuthorized) {
@@ -49,23 +48,19 @@ export default function TabsLayout() {
                         alert('Activity Recognition permission is required to track your workout sessions.');
                         //todo: return false?????
                     }
-                    //setIsGoogleFitAndAccountAreConnected(true);
                     return true;
                     // await fetchGoogleFitData();
                 } else {
                     alert("you have idToken but you are not authorized to googlefit....")
-                    //setIsGoogleFitAndAccountAreConnected(false);
                     return false;
                 }
 
             }
             console.log("You are not signin to google... needs to sign in");
             console.log("Your idToken && accessTokenState && userIdState: idtoken= " + idToken + " accessToken= " + accessTokenState + " userId= " + userIdState);//todo: to remove
-            //setIsGoogleFitAndAccountAreConnected(false);
             return false;
         } catch (err) {
             console.log("Failed to check if you are signin or not... error: ", err);
-            //setIsGoogleFitAndAccountAreConnected(false);
             return false;
         }
     };
@@ -73,7 +68,7 @@ export default function TabsLayout() {
 
     return (
         <>
-            {!accessTokenState || !userIdState ? (<GoogleLogin/>) : (
+            {!accessTokenState || !userIdState || !googleAccessTokenState ? (<GoogleLogin/>) : (
                 <Tabs>
                     <Tabs.Screen
                         name="MyTrainingPlan"
