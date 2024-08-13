@@ -2,14 +2,13 @@ import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
 import {WeeklyPlan, Workout } from "../types/training";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { Dimensions } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { Divider, Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
-import { TextInput } from 'react-native-paper';
+import { SegmentedButtons, TextInput } from 'react-native-paper';
 
-export default function EditWorkout({plan, setPlan, workout, modalVisible, setModalVisible}: 
+export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}: 
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
-        workout: Workout, 
+        workout: Workout,
         modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
     const [editedWorkout, setEditedWorkout] = useState<Workout>(workout);
 
@@ -40,15 +39,59 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
         <View style={styles.modalView}>
             <Text style={styles.modalText}>{moment(workout.date).format('ll')}</Text>
             <TextInput
-            style={{marginVertical:5}}
+                keyboardType="numeric"
+                style={{marginVertical:5}}
                 outlineStyle={{borderColor:"#34bdeb"}}
+                label={"Total time (minutes)"}
                 mode="outlined"
                 editable
-                multiline
-                numberOfLines={2}
-                onChangeText={(text) => setEditedWorkout({...editedWorkout, workout:text})}
-                value={editedWorkout.workout}
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
+                value={editedWorkout.completedTime || 0}
             />
+            <TextInput
+                keyboardType="numeric"
+                style={{marginVertical:5}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                label={"Completed distance (km)"}
+                mode="outlined"
+                editable
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
+                value={editedWorkout.completedDistance || 0}
+            />
+            <Text style={styles.modalText}>How difficult was the workout?</Text>
+            <SegmentedButtons
+                style={{marginVertical:10}}
+                density="medium"
+                value={editedWorkout.difficultyFeedback?.toString() || "3"}
+                onValueChange={(text) => setEditedWorkout({...editedWorkout, difficultyFeedback:Number.parseInt(text)})}
+                buttons={[
+                {
+                    value: '1',
+                    label: '1',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '2',
+                    label: '2',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '3',
+                    label: '3',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '4',
+                    label: '4',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '5',
+                    label: '5',
+                    style:{minWidth:15}
+                },
+                ]}
+      />
           <View style={{flexDirection:"row"}}>
             <Pressable
             style={[styles.button, styles.buttonClose]}
@@ -69,7 +112,7 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
 const styles = StyleSheet.create({
     modalView: {
         marginHorizontal:'10%',
-        marginVertical: '35vh',
+        marginVertical: '15vh',
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,
@@ -96,10 +139,14 @@ const styles = StyleSheet.create({
       textAlign: 'center',
     },
     modalText: {
-      marginBottom: 15,
+      marginVertical: 10,
       textAlign: 'center',
       color:"gray"
     },
+      row: {
+        justifyContent:"space-between",
+        flexDirection:"row",
+      },
   });
   
   
