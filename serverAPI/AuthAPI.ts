@@ -20,7 +20,7 @@ export function useRefreshToken(): Promise<Tokens> {
     return new Promise<Tokens>(async (resolve, reject) => {
         const refreshToken = await getRefreshTokenFromAsyncStorage();
         api.get('/auth/refresh', {
-            headers: { 'Authorization': `Bearer ${refreshToken}` }
+            headers: {'Authorization': `Bearer ${refreshToken}`}
         })
             .then(async response => {
                 //Todo: use multiset instead...
@@ -36,12 +36,14 @@ export function logoutFromServer(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         const refreshToken = await getRefreshTokenFromAsyncStorage();
         api.get('/auth/logout', {
-            headers: { 'Authorization': `Bearer ${refreshToken}` }
+            headers: {'Authorization': `Bearer ${refreshToken}`}
         })
             .then(response => {
                 console.log("Successes to logout from server..")
                 resolve(response.data);
             })
-            .catch((error) => reject(error));
+            .catch((error) => {
+                reject(error)
+            });
     });
 }

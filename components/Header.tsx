@@ -53,9 +53,10 @@ export default function AppHeader() {
 
     const handleLogout = async () => {
         try {
+            console.log("In logout handler..")
             await logoutFromServer();
             await clearAllDataFromAsyncStorage();
-            await GoogleSignin.revokeAccess();//TODO: check about the premissions
+            await GoogleSignin.revokeAccess();//TODO: check about the permissions
             await GoogleSignin.signOut();
             setAccessToken(null);
             setUserId(null);
