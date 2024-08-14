@@ -49,10 +49,10 @@ const NotificationModal = (props: NotificationModalProps) => {
       <View style={styles.container}>
         <Text style={styles.title}>Hi it's Skyler!</Text>
         {notifications.map((notification) => 
-          <div key={notification._id} style={styles.notification}>
+          <View key={notification._id} style={styles.notification}>
             <Text>{`Workout Reminder for Today (${notification.date}) - ${notification.workout}`}</Text>
             <Button onPress={() => removeNotification(notification._id)}>x</Button>
-          </div>
+          </View>
         )}
       </View>
     </Modal>

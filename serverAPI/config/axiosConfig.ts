@@ -37,10 +37,12 @@ api.interceptors.response.use(
         const originalRequest = error.config;
         if ((error.response?.status === 401 || error.response?.status === 403) && originalRequest?.url !== "/auth/login") {
             if (!isRefreshing) {
+                console.log("Server access token has expired, about to refresh tokens...")
                 isRefreshing = true;
                 try {
                     await useRefreshToken();
                     const newAccessToken = await getAccessTokenFromAsyncStorage();
+                    console.log("Got the new tokens from server")
                     retryFailedRequests(newAccessToken!);
                     originalRequest!.headers.Authorization = `Bearer ${newAccessToken}`;
                     return axios(originalRequest!);
