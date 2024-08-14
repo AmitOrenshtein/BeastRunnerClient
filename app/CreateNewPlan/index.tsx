@@ -6,6 +6,7 @@ import UserLevel from "./UserLevel";
 import UserGoal from "./UserGoal";
 import { Gender, UserPreferences } from "../types/user";
 import PlanDates from "./PlanDates";
+import { router } from "expo-router";
 
 enum Attributes {
   userRunningLevel = "userRunningLevel",
@@ -35,16 +36,17 @@ const CreateNewPlan: FC = () => {
         //   userFitnessData: TODO: get data from google fit
       });
       console.log(plan);
+      setGeneratePlanloading(false);
+      router.replace("/MyTrainingPlan");
     } catch (error) {
       console.error(error);
-    } finally {
       setGeneratePlanloading(false);
     }
   };
 
   const handleChangePreferences =
     (attributeName: Attributes) => (checkedValue: string) => {
-        console.log(checkedValue);
+      console.log(checkedValue);
       setUserPreferences((prev) => {
         return {
           ...prev,
@@ -56,15 +58,11 @@ const CreateNewPlan: FC = () => {
   const content = [
     <UserLevel
       userLevel={userPreferences?.userRunningLevel || ""}
-      dispatchUserLevel={handleChangePreferences(
-        Attributes.userRunningLevel
-      )}
+      dispatchUserLevel={handleChangePreferences(Attributes.userRunningLevel)}
     />,
     <UserGoal
       userGoal={userPreferences?.userRunningLevel || ""}
-      dispatchUserGoal={handleChangePreferences(
-        Attributes.userRunningGoal
-      )}
+      dispatchUserGoal={handleChangePreferences(Attributes.userRunningGoal)}
     />,
     <PlanDates
       label="Start Date"
@@ -73,20 +71,21 @@ const CreateNewPlan: FC = () => {
     <PlanDates
       label="End Date"
       dispatchDate={handleChangePreferences(Attributes.endDate)}
-    />
+    />,
   ];
 
   return (
     <View style={styles.container}>
-      <Stepper
-        active={activeStep}
-        content={content}
-        onBack={() => setActiveStep((p) => p - 1)}
-        onFinish={() => generatePlan()}
-        onNext={() => setActiveStep((p) => p + 1)}
-      />
-      {generatePlanloading && (
+      {generatePlanloading ? (
         <ActivityIndicator size="large" color="#2ecc71" />
+      ) : (
+        <Stepper
+          active={activeStep}
+          content={content}
+          onBack={() => setActiveStep((p) => p - 1)}
+          onFinish={() => generatePlan()}
+          onNext={() => setActiveStep((p) => p + 1)}
+        />
       )}
     </View>
   );
