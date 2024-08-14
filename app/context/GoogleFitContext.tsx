@@ -14,8 +14,6 @@ interface GoogleFitContextProps {
     getHeartPointSummary: (startTime: number, endTime: number) => Promise<any>;
     getMoveMinutesSummary: (startTime: number, endTime: number) => Promise<any>;
     getStepsCountSummary: (startTime: number, endTime: number) => Promise<any>;
-    getBodyFatPercentageSummary: (startTime: number, endTime: number) => Promise<any>;
-    getHeartRateSummary: (startTime: number, endTime: number) => Promise<any>;
     getHeightSummary: (startTime: number, endTime: number) => Promise<any>;
     getWeightSummary: (startTime: number, endTime: number) => Promise<any>;
     getDurationSummary: (startTime: number, endTime: number) => Promise<any>;
@@ -34,8 +32,6 @@ const GoogleFitContext = createContext<GoogleFitContextProps | undefined>({
     getHeartPointSummary: async () => [],
     getMoveMinutesSummary: async () => [],
     getStepsCountSummary: async () => [],
-    getBodyFatPercentageSummary: async () => [],
-    getHeartRateSummary: async () => [],
     getHeightSummary: async () => [],
     getWeightSummary: async () => [],
     getDurationSummary: async () => [],
@@ -79,81 +75,14 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
                     startTimeMillis: startTime,
                     endTimeMillis: endTime,
                 },
-                // {
-                //     headers: {
-                //         Authorization: `Bearer ${googleAccessTokenState}`,
-                //         'Content-Type': 'application/json'
-                //     },
-                // }
             );
             console.log("finished to fetch " + dataType + " for google fit: ", response.data);
             return response.data;
         } catch (error) {
-            // if (axios.isAxiosError(error) && error.response?.status === 401) {
-            //     console.log("about to refresh google access token... old google access token: " + googleAccessTokenState)
-            //     const newToken = await onGoogleAccessTokenExpired();
-            //     console.log("finished to refresh.. The new google access token: " + newToken);
-            //     // setGoogleAccessToken(newToken);//todo?? what will hapend here?
-            //     return fetchData(dataType, dataSourceId, startTime, endTime);
-            // }
             console.error(`Error fetching data for ${dataType}:`, error);
             throw error;
         }
     }, [googleAccessTokenState]);
-
-    // const contextValue = {
-    //     googleAccessTokenState,
-    //     setGoogleAccessToken: (token: string | null) =>
-    //         setGoogleAccessTokenState(token),
-    //     configureGoogleFit: async () => {
-    //         const options = {
-    //             scopes: [
-    //                 Scopes.FITNESS_ACTIVITY_READ,
-    //                 Scopes.FITNESS_BODY_READ,
-    //                 Scopes.FITNESS_LOCATION_READ,
-    //                 Scopes.FITNESS_HEART_RATE_READ,
-    //                 Scopes.FITNESS_REPRODUCTIVE_HEALTH_READ
-    //             ],
-    //         };
-    //
-    //         const result = await GoogleFit.authorize(options);
-    //         if (result.success) {
-    //             console.log("authorized successfully to google-fit");
-    //             return true;
-    //         } else {
-    //             console.log('Google Fit authorization failed');
-    //             return false;
-    //         }
-    //     },
-    //     getAllRunningSessions: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.running', startTime, endTime),
-    //     getAllWalkingSessions: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.walking', startTime, endTime),
-    //     getRunningSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.activity.summary', startTime, endTime),
-    //     getWalkingSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.activity.summary', startTime, endTime),
-    //     getCaloriesBurnedSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.calories.expended', startTime, endTime),
-    //     getHeartPointSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.heart_minutes.summary', startTime, endTime),
-    //     getMoveMinutesSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.active_minutes', startTime, endTime),
-    //     getStepsCountSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.step_count.delta', startTime, endTime),
-    //     getBodyFatPercentageSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.body.fat.percentage.summary', startTime, endTime),
-    //     getHeartRateSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.heart_rate.summary', startTime, endTime),
-    //     getHeightSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.height.summary', startTime, endTime),
-    //     getWeightSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.weight.summary', startTime, endTime),
-    //     getDurationSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.duration', startTime, endTime),
-    //     getSpeedSummary: (startTime: number, endTime: number) =>
-    //         fetchData('com.google.speed.summary', startTime, endTime),
-    // };
 
 
     const setGoogleAccessToken = (token: string | null) => {
@@ -235,17 +164,6 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
         return fetchData('com.google.step_count.delta', stepsCountDataSourceId, startTime, endTime);
     };
 
-    // Function to get body fat percentage summary
-    const getBodyFatPercentageSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const bodyFatPercentageDataSourceId = 'derived:com.google.body.fat.percentage:com.google.android.gms:merge_body_fat_percentage';
-        return fetchData('com.google.body.fat.percentage.summary', bodyFatPercentageDataSourceId, startTime, endTime);
-    };
-
-    // Function to get heart rate summary
-    const getHeartRateSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const heartRateDataSourceId = 'derived:com.google.heart_rate.bpm:com.google.android.gms:merge_heart_rate_bpm';
-        return fetchData('com.google.heart_rate.summary', heartRateDataSourceId, startTime, endTime);
-    };
 
     // Function to get height summary
     const getHeightSummary = async (startTime: number, endTime: number): Promise<any> => {
@@ -284,8 +202,6 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
                 getHeartPointSummary,
                 getMoveMinutesSummary,
                 getStepsCountSummary,
-                getBodyFatPercentageSummary,
-                getHeartRateSummary,
                 getHeightSummary,
                 getWeightSummary,
                 getDurationSummary,

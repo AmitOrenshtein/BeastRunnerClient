@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
+import {getAllDataSource} from "@/app/utils/googleAxiosConfig";
 
 
 const GoogleFitData = () => {
@@ -13,8 +14,6 @@ const GoogleFitData = () => {
         getHeartPointSummary,
         getMoveMinutesSummary,
         getStepsCountSummary,
-        getBodyFatPercentageSummary,
-        getHeartRateSummary,
         getHeightSummary,
         getWeightSummary,
         getDurationSummary,
@@ -34,6 +33,8 @@ const GoogleFitData = () => {
 
         const fetchGoogleFitData = async () => {
             try {
+                await getAllDataSource();//todo:to delete after det all needed data from google fit
+
                 const startTime = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
                 const endTime = Date.now();
 
@@ -124,12 +125,6 @@ const GoogleFitData = () => {
 
                     <Text style={styles.title}>Steps Count Summary:</Text>
                     <Text>{JSON.stringify(data.stepsCountSummary)}</Text>
-
-                    <Text style={styles.title}>Body Fat Percentage Summary:</Text>
-                    <Text>PROBLEM!!</Text>
-
-                    <Text style={styles.title}>Heart Rate Summary:</Text>
-                    <Text>PROBLEM!!</Text>
 
                     <Text style={styles.title}>Height Summary:</Text>
                     <Text>{JSON.stringify(data.heightSummary)}</Text>

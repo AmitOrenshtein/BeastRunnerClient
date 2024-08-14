@@ -12,7 +12,6 @@ import {
 import {googleSignin} from "@/serverAPI/AuthAPI";
 import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
-import {requestActivityRecognitionPermission} from "@/app/utils/PermissionsUtil";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function GoogleLogin() {
@@ -33,10 +32,6 @@ export default function GoogleLogin() {
                 const res = await googleSignin(userInfo.idToken);
                 console.log("response:", res);
                 await configureGoogleFit();
-                const hasPermission = await requestActivityRecognitionPermission();
-                if (!hasPermission) {
-                    alert('Activity Recognition permission is required to track your workout sessions.');
-                }
                 console.log("save new idToken in storage...");
                 await AsyncStorage.setItem('googleAccessToken', tokensFromGoogle.accessToken);//todo: util function
                 await saveIdTokenInAsyncStorage(userInfo.idToken);

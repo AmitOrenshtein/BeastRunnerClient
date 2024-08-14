@@ -8,7 +8,6 @@ import GoogleFit from "react-native-google-fit";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
 import {useEffect} from "react";
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
-import {requestActivityRecognitionPermission} from "@/app/utils/PermissionsUtil";
 
 export default function TabsLayout() {
     const {accessTokenState, userIdState} = useAccessTokenAndUserId();
@@ -39,17 +38,10 @@ export default function TabsLayout() {
             const idToken = await AsyncStorage.getItem('idToken');
             if (idToken && accessTokenState && userIdState && googleAccessTokenState) {
                 console.log("Already signin to google (have idToken && accessTokenState && userIdState)");
-                // setIdToken(idToken);
                 await configureGoogleFit();
                 if (GoogleFit.isAuthorized) {
                     console.log("GoogleFit.isAuthorized is true also :)")
-                    const hasPermission = await requestActivityRecognitionPermission();
-                    if (!hasPermission) {
-                        alert('Activity Recognition permission is required to track your workout sessions.');
-                        //todo: return false?????
-                    }
                     return true;
-                    // await fetchGoogleFitData();
                 } else {
                     alert("you have idToken but you are not authorized to googlefit....")
                     return false;
@@ -58,6 +50,7 @@ export default function TabsLayout() {
             }
             console.log("You are not signin to google... needs to sign in");
             console.log("Your idToken && accessTokenState && userIdState: idtoken= " + idToken + " accessToken= " + accessTokenState + " userId= " + userIdState);//todo: to remove
+            console.log("Your googleAccessToken= " + googleAccessTokenState);//todo: to remove
             return false;
         } catch (err) {
             console.log("Failed to check if you are signin or not... error: ", err);
