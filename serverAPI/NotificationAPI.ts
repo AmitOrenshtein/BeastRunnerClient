@@ -1,4 +1,4 @@
-import { api } from "./config/axiosConfig";
+import api from "./config/axiosConfig";
 import { AxiosResponse } from "axios";
 
 export const NotificationAPI = {

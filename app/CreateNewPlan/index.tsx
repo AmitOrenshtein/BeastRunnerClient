@@ -6,6 +6,7 @@ import UserLevel from "./UserLevel";
 import UserGoal from "./UserGoal";
 import { Gender, UserPreferences } from "../types/user";
 import PlanDates from "./PlanDates";
+import {useGoogleFit} from "@/app/context/GoogleFitContext";
 
 enum Attributes {
   userRunningLevel = "userRunningLevel",
@@ -14,25 +15,47 @@ enum Attributes {
   endDate = "endDate",
 }
 
+interface GoogleFitData {
+  age: number;
+  gender: Gender;
+  height: number;
+  weight: number;
+}
+
 const CreateNewPlan: FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [generatePlanloading, setGeneratePlanloading] =
     useState<boolean>(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>();
+  const [googleFitData, setGoogleFitData] = useState<GoogleFitData>({
+    age: 24,
+    gender: Gender.male,
+    height: 0,
+    weight: 0,})
+  const {
+    getCurrentWeight,
+    getCurrentHeight,
+} = useGoogleFit();
+
+const fetchGoogleFitData = async () => {
+  try {
+      const startTime = '2023-01-01T00:00:17.971Z';
+      const endTime = new Date().toUTCString();
+      getCurrentHeight(startTime, endTime).then(res => setGoogleFitData(data => ({...data, height: res[0].value})));
+      getCurrentWeight(startTime, endTime).then(res => setGoogleFitData(data => ({...data, weight: res[0].value}))); 
+  } catch (error) {
+      console.log("Google Fit data fetch error: ", error);
+  }
+};
 
   const generatePlan = async () => {
     setGeneratePlanloading(true);
 
     try {
+      await fetchGoogleFitData()
       const plan = await PlanAPI.generatePlan({
         userPreferences: userPreferences,
-        userFitnessData: {
-          age: 24,
-          gender: Gender.male,
-          height: 180,
-          weight: 72,
-        },
-        //   userFitnessData: TODO: get data from google fit
+        userFitnessData: googleFitData,
       });
       console.log(plan);
     } catch (error) {

@@ -16,7 +16,8 @@ export default function GoogleFitData() {
         getDailyMovementMinutes,
         getDailyStepsNumber,
         getCurrentWeight,
-        getCurrentHeight, getAverageHeartRate
+        getCurrentHeight,
+        getAverageHeartRate
     } = useGoogleFit();
 
 
@@ -64,7 +65,7 @@ export default function GoogleFitData() {
     const fetchGoogleFitData = async () => {
         try {
             const startTime = '2023-01-01T00:00:17.971Z';
-            const endTime = new Date().toISOString();
+            const endTime = new Date().toUTCString();
             // getCurrentHeight(startTime, endTime).then(res => setGoogleFitData(res.pop()?.value || 0));
             // getCurrentWeight(startTime, endTime).then(res => alert("weight: "+res));
             // getDailyDistance(startTime, endTime).then(res => console.log("distance: ",res));
@@ -74,7 +75,7 @@ export default function GoogleFitData() {
             // getAllDailyWalkingSessions(startTime, endTime).then(res => console.log("walking sessions: ",res));
             // getAverageHeartRate(startTime, endTime).then(res => console.log("heart_rate: ",res));
             getCurrentHeight(startTime, endTime).then(res => console.log("height: ", res));
-            getCurrentWeight(startTime, endTime).then(res => console.log("weight: ", res));
+            getCurrentWeight(startTime, endTime).then(res => console.log("weight: ", res)); 
             getDailyDistance(startTime, endTime).then(res => console.log("distance: ", res));
             getDailyStepsNumber(startTime, endTime).then(res => console.log("steps: ", res));
             getDailyMovementMinutes(startTime, endTime).then(res => console.log("movement_minutes: ", res));
