@@ -33,16 +33,16 @@ const CreateNewPlan: FC = () => {
     height: 0,
     weight: 0,})
   const {
-    getCurrentWeight,
-    getCurrentHeight,
+    getWeightSummary,
+    getHeightSummary,
 } = useGoogleFit();
 
 const fetchGoogleFitData = async () => {
   try {
-      const startTime = '2023-01-01T00:00:17.971Z';
-      const endTime = new Date().toUTCString();
-      getCurrentHeight(startTime, endTime).then(res => setGoogleFitData(data => ({...data, height: res[0].value})));
-      getCurrentWeight(startTime, endTime).then(res => setGoogleFitData(data => ({...data, weight: res[0].value}))); 
+    const startTime = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
+    const endTime = Date.now();
+      getHeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, height: res.bucket[0].dataset[0].point[0].value[0].fpVal})));
+      getWeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, weight: res.bucket[0].dataset[0].point[0].value[0].fpVal}))); 
   } catch (error) {
       console.log("Google Fit data fetch error: ", error);
   }
