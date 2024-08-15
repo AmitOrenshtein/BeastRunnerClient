@@ -5,12 +5,13 @@ import {AccessTokenAndUserIdProvider} from "@/app/context/IdentifiersContext";
 
 export default function RootLayout() {
     return (
-        <GoogleFitProvider>
-            <AccessTokenAndUserIdProvider>
+        <AccessTokenAndUserIdProvider>
+            <GoogleFitProvider>
                 <Stack>
                     <Stack.Screen name="(tabs)" options={{headerShown: true, header: () => <AppHeader/>}}/>
                 </Stack>
-            </AccessTokenAndUserIdProvider>
-        </GoogleFitProvider>
+            </GoogleFitProvider>
+        </AccessTokenAndUserIdProvider>
+
     );
 }

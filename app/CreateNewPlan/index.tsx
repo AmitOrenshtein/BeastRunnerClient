@@ -7,6 +7,7 @@ import UserGoal from "./UserGoal";
 import { Gender, UserPreferences } from "../types/user";
 import PlanDates from "./PlanDates";
 import { router } from "expo-router";
+import {useGoogleFit} from "@/app/context/GoogleFitContext";
 
 enum Attributes {
   userRunningLevel = "userRunningLevel",
@@ -15,25 +16,47 @@ enum Attributes {
   endDate = "endDate",
 }
 
+interface GoogleFitData {
+  age: number;
+  gender: Gender;
+  height: number;
+  weight: number;
+}
+
 const CreateNewPlan: FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [generatePlanloading, setGeneratePlanloading] =
     useState<boolean>(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>();
+  const [googleFitData, setGoogleFitData] = useState<GoogleFitData>({
+    age: 24,
+    gender: Gender.male,
+    height: 0,
+    weight: 0,})
+  const {
+    getWeightSummary,
+    getHeightSummary,
+} = useGoogleFit();
+
+const fetchGoogleFitData = async () => {
+  try {
+    const startTime = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
+    const endTime = Date.now();
+      getHeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, height: res.bucket[0].dataset[0].point[0].value[0].fpVal})));
+      getWeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, weight: res.bucket[0].dataset[0].point[0].value[0].fpVal}))); 
+  } catch (error) {
+      console.log("Google Fit data fetch error: ", error);
+  }
+};
 
   const generatePlan = async () => {
     setGeneratePlanloading(true);
 
     try {
+      await fetchGoogleFitData()
       const plan = await PlanAPI.generatePlan({
         userPreferences: userPreferences,
-        userFitnessData: {
-          age: 24,
-          gender: Gender.male,
-          height: 180,
-          weight: 72,
-        },
-        //   userFitnessData: TODO: get data from google fit
+        userFitnessData: googleFitData,
       });
       console.log(plan);
       setGeneratePlanloading(false);

@@ -1,110 +1,169 @@
-import {StyleSheet, View, Text, ScrollView} from "react-native";
-import {useEffect, useState} from "react";
-import GoogleFit from 'react-native-google-fit';
+import React, {useEffect, useState} from 'react';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
-import Theme from "@/appTheme";
-import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
+import {getAllDataSource} from "@/app/utils/googleAxiosConfig";
 
-export default function GoogleFitData() {
-    const {accessTokenState, userIdState, setUserId, setAccessToken} = useAccessTokenAndUserId();
-    const [isAuthorizedToGoogleFit, setIsAuthorizedToGoogleFit] = useState(false);
-    const [googleFitData, setGoogleFitData] = useState({});
+
+const GoogleFitData = () => {
     const {
-        getAllDailyRunningSessions,
-        getAllDailyWalkingSessions,
-        getDailyDistance,
-        getDailyMovementMinutes,
-        getDailyStepsNumber,
-        getCurrentWeight,
-        getCurrentHeight, getAverageHeartRate
+        googleAccessTokenState,
+        getAllRunningSessions,
+        getAllWalkingSessions,
+        getRunningSummary,
+        getCaloriesBurnedSummary,
+        getHeartPointSummary,
+        getMoveMinutesSummary,
+        getStepsCountSummary,
+        getHeightSummary,
+        getWeightSummary,
+        getDurationSummary,
+        getSpeedSummary,
     } = useGoogleFit();
 
-
+    const [data, setData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (GoogleFit.isAuthorized) {
-            setIsAuthorizedToGoogleFit(true);
-            fetchGoogleFitData();
-        } else (
-            console.log("GoogleFit.isAuthorized = false")
-        )
+        if (!googleAccessTokenState) {
+            setError('Google Access Token is missing.');
+            //setLoading(false);
+            return;
+        }
+
+        const fetchGoogleFitData = async () => {
+            try {
+                await getAllDataSource();//todo:to delete after det all needed data from google fit
+
+                const startTime = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
+                const endTime = Date.now();
+
+                // Fetch data from Google Fit API
+                const [
+                    runningSessions,
+                    walkingSessions,
+                    runningSummary,
+                    caloriesBurnedSummary,
+                    heartPointSummary,
+                    moveMinutesSummary,
+                    stepsCountSummary,
+                    heightSummary,
+                    weightSummary,
+                    durationSummary,
+                    speedSummary,
+                ] = await Promise.all([
+                    getAllRunningSessions(startTime, endTime),
+                    getAllWalkingSessions(startTime, endTime),
+                    getRunningSummary(startTime, endTime),
+                    getCaloriesBurnedSummary(startTime, endTime),
+                    getHeartPointSummary(startTime, endTime),
+                    getMoveMinutesSummary(startTime, endTime),
+                    getStepsCountSummary(startTime, endTime),
+                    getHeightSummary(startTime, endTime),
+                    getWeightSummary(startTime, endTime),
+                    getDurationSummary(startTime, endTime),
+                    getSpeedSummary(startTime, endTime),
+                ]);
+
+                // Set fetched data
+                setData({
+                    runningSessions,
+                    walkingSessions,
+                    runningSummary,
+                    caloriesBurnedSummary,
+                    heartPointSummary,
+                    moveMinutesSummary,
+                    stepsCountSummary,
+                    heightSummary,
+                    weightSummary,
+                    durationSummary,
+                    speedSummary,
+                });
+            } catch (err) {
+                console.error('Error fetching Google Fit data:', err);
+                setError('Failed to fetch data.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGoogleFitData();
     }, []);
 
-    // const fetchGoogleFitData = async () => {
-    //     try {
-    //         const startTime = '2023-01-01T00:00:17.971Z';
-    //         const endTime = new Date().toISOString();
-    //
-    //         const height = await getCurrentHeight(startTime, endTime);
-    //         const currentWeight = await getCurrentWeight(startTime, endTime);
-    //         const distance = await getDailyDistance(startTime, endTime);
-    //         const steps = await getDailyStepsNumber(startTime, endTime);
-    //         const movementMinutes = await getDailyMovementMinutes(startTime, endTime);
-    //         const runningSessions = await getAllDailyRunningSessions(startTime, endTime);
-    //         const walkingSessions = await getAllDailyWalkingSessions(startTime, endTime);
-    //         const heartRate = await getAverageHeartRate(startTime, endTime);
-    //
-    //         setGoogleFitData({
-    //             height: height,
-    //             currentWeight: currentWeight.reverse().pop()?.value,
-    //             weights: currentWeight.map(item => item.value),
-    //             distance: distance,
-    //             steps: steps,
-    //             movementMinutes: movementMinutes,
-    //             runningSessions,
-    //             walkingSessions,
-    //             heartRate: heartRate
-    //         });
-    //     } catch (error) {
-    //         console.log("Google Fit data fetch error: ", error);
-    //     }
-    // };
+    if (loading) {
+        return <LoadingSpinner/>;
+    }
 
-
-    const fetchGoogleFitData = async () => {
-        try {
-            const startTime = '2023-01-01T00:00:17.971Z';
-            const endTime = new Date().toISOString();
-            // getCurrentHeight(startTime, endTime).then(res => setGoogleFitData(res.pop()?.value || 0));
-            // getCurrentWeight(startTime, endTime).then(res => alert("weight: "+res));
-            // getDailyDistance(startTime, endTime).then(res => console.log("distance: ",res));
-            // getDailyStepsNumber(startTime, endTime).then(res => console.log("steps: ",res));
-            // getDailyMovementMinutes(startTime, endTime).then(res => console.log("movement_minutes: ",res));
-            // getAllDailyRunningSessions(startTime, endTime).then(res => console.log("running sessions: ",res));
-            // getAllDailyWalkingSessions(startTime, endTime).then(res => console.log("walking sessions: ",res));
-            // getAverageHeartRate(startTime, endTime).then(res => console.log("heart_rate: ",res));
-            getCurrentHeight(startTime, endTime).then(res => console.log("height: ", res));
-            getCurrentWeight(startTime, endTime).then(res => console.log("weight: ", res));
-            getDailyDistance(startTime, endTime).then(res => console.log("distance: ", res));
-            getDailyStepsNumber(startTime, endTime).then(res => console.log("steps: ", res));
-            getDailyMovementMinutes(startTime, endTime).then(res => console.log("movement_minutes: ", res));
-            getAllDailyRunningSessions(startTime, endTime).then(res => console.log("running sessions: ", res));
-            getAllDailyWalkingSessions(startTime, endTime).then(res => console.log("walking sessions: ", res));
-            getAverageHeartRate(startTime, endTime).then(res => console.log("heart_rate: ", res));
-        } catch (error) {
-            console.log("Google Fit data fetch error: ", error);
-        }
-    };
-
+    if (error) {
+        return <Text style={styles.errorText}>{error}</Text>;
+    }
 
     return (
-        isAuthorizedToGoogleFit && (
-            <Text>{JSON.stringify(googleFitData)}</Text>
-        )
+        <View style={styles.container}>
+            {data ? (
+                <ScrollView>
+                    <Text style={styles.title}>Running Sessions:</Text>
+                    <Text>{JSON.stringify(data.runningSessions)}</Text>
+
+                    <Text style={styles.title}>Walking Sessions:</Text>
+                    <Text>{JSON.stringify(data.walkingSessions)}</Text>
+
+                    <Text style={styles.title}>Running Summary:</Text>
+                    <Text>{JSON.stringify(data.runningSummary)}</Text>
+
+                    <Text style={styles.title}>Walking Summary:</Text>
+                    <Text>{JSON.stringify("Needs to implement")}</Text>
+
+                    <Text style={styles.title}>Calories Burned Summary:</Text>
+                    <Text>{JSON.stringify(data.caloriesBurnedSummary)}</Text>
+
+                    <Text style={styles.title}>Heart Points Summary:</Text>
+                    <Text>{JSON.stringify(data.heartPointSummary)}</Text>
+
+                    <Text style={styles.title}>Move Minutes Summary:</Text>
+                    <Text>{JSON.stringify(data.moveMinutesSummary)}</Text>
+
+                    <Text style={styles.title}>Steps Count Summary:</Text>
+                    <Text>{JSON.stringify(data.stepsCountSummary)}</Text>
+
+                    <Text style={styles.title}>Height Summary:</Text>
+                    <Text>{JSON.stringify(data.heightSummary)}</Text>
+
+                    <Text style={styles.title}>Weight Summary:</Text>
+                    <Text>{JSON.stringify(data.weightSummary)}</Text>
+
+                    <Text style={styles.title}>Duration Summary:</Text>
+                    <Text>{JSON.stringify(data.durationSummary)}</Text>
+
+                    <Text style={styles.title}>Speed Summary:</Text>
+                    <Text>{JSON.stringify(data.speedSummary)}</Text>
+                </ScrollView>
+            ) : (
+                <Text>No data available</Text>
+            )}
+        </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         padding: 16,
-        backgroundColor: Theme.colors.white,
     },
-    text: {
-        fontSize: 16,
-        color: 'black',
-        marginBottom: 10,
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginVertical: 8,
+    },
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
     },
 });
+
+export default GoogleFitData;
+
+const LoadingSpinner = () => (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Loading...</Text>
+    </View>
+);

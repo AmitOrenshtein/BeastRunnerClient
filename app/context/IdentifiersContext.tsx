@@ -40,7 +40,7 @@ export const AccessTokenAndUserIdProvider: React.FC<{ children: ReactNode }> = (
             } catch (error) {
                 console.error("Failed to load access token and user ID:", error);
             } finally {
-                console.log("Loading in Context has been finished");
+                console.log("Loading in identifier Context has been finished");
                 setLoading(false); // Set loading to false when done
             }
         };
