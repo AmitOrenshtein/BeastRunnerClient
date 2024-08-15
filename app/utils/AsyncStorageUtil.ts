@@ -27,6 +27,15 @@ export const getIdTokenFromAsyncStorage = async (): Promise<string | null> => {
     }
 };
 
+export const getGoogleAccessTokenFromAsyncStorage = async (): Promise<string | null> => {
+    try {
+        return await AsyncStorage.getItem('googleAccessToken');
+    } catch (error) {
+        console.error('Error getting google access token from AsyncStorage', error);
+        return null;
+    }
+};
+
 export const getUserIdFromAsyncStorage = async (): Promise<string | null> => {
     try {
         return await AsyncStorage.getItem('userId');
@@ -60,6 +69,14 @@ export const saveIdTokenInAsyncStorage = async (token: string): Promise<void> =>
     }
 };
 
+export const saveGoogleAccessTokenInAsyncStorage = async (token: string): Promise<void> => {
+    try {
+        await AsyncStorage.setItem('googleAccessToken', token);
+    } catch (error) {
+        console.error('Error saving google access token in AsyncStorage', error);
+    }
+};
+
 export const saveUserIdInAsyncStorage = async (userId: string): Promise<void> => {
     try {
         await AsyncStorage.setItem('userId', userId);
@@ -89,7 +106,6 @@ export const clearUserIdFromAsyncStorage = async (): Promise<void> => {
 export const clearAllDataFromAsyncStorage = async (): Promise<void> => {
     try {
        await AsyncStorage.clear();
-        // await AsyncStorage.multiRemove(['accessToken','refreshToken','idToken', 'userId']);
     } catch (error) {
         console.error('Error removing all data from AsyncStorage', error);
     }

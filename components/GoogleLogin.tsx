@@ -1,7 +1,6 @@
 import {Image, StyleSheet, View} from "react-native";
 import {Button, Text} from "react-native-paper"
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
-import {useEffect} from "react";
 import Theme from "@/appTheme";
 import {
     clearAllDataFromAsyncStorage,
@@ -13,31 +12,11 @@ import {
 import {googleSignin} from "@/serverAPI/AuthAPI";
 import {useAccessTokenAndUserId} from "@/app/context/IdentifiersContext";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function GoogleLogin() {
     const {setUserId, setAccessToken} = useAccessTokenAndUserId();
-    const {configureGoogleFit} = useGoogleFit();
-
-    const configureGoogleSignIn = () => {
-        GoogleSignin.configure({
-            scopes: [
-                'https://www.googleapis.com/auth/fitness.activity.read',
-                'https://www.googleapis.com/auth/fitness.body.read',
-                'https://www.googleapis.com/auth/fitness.location.read',
-                'https://www.googleapis.com/auth/fitness.reproductive_health.read',
-                'https://www.googleapis.com/auth/fitness.heart_rate.read'
-            ],
-            // @ts-ignore
-            androidClientId: "your_androidClientId",//todo: get from env file,
-            webClientId: 'your_webClientId', //todo: get from env file,
-            iosClientId: "your_iosClientId",//todo: get from env file,
-        });
-    }
-
-
-    useEffect(() => {
-        configureGoogleSignIn();
-    }, []);
+    const {configureGoogleFit, setGoogleAccessToken} = useGoogleFit();
 
 
     const signIn = async () => {
@@ -46,19 +25,23 @@ export default function GoogleLogin() {
         try {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
+            const tokensFromGoogle = await GoogleSignin.getTokens();
             console.log("user info: ", userInfo);
-            if (userInfo.idToken) {
+            console.log("googleAccessToken= " + tokensFromGoogle.accessToken);
+            if (userInfo.idToken && tokensFromGoogle.accessToken) {
                 const res = await googleSignin(userInfo.idToken);
-                console.log("save new idToken in storage...");
-                await saveIdTokenInAsyncStorage(userInfo.idToken);
-                console.log("id token: ", userInfo.idToken);
-                await saveAccessTokenInAsyncStorage(res.accessToken!);//todo: if undefine?
-                setAccessToken(res.accessToken!);
-                await saveRefreshTokenInAsyncStorage(res.refreshToken!);//todo: if undefine?
-                await (res._id! && saveUserIdInAsyncStorage(res._id!));//todo: if undefine?
-                setUserId(res._id!);
                 console.log("response:", res);
                 await configureGoogleFit();
+                console.log("save new idToken in storage...");
+                await AsyncStorage.setItem('googleAccessToken', tokensFromGoogle.accessToken);//todo: util function
+                await saveIdTokenInAsyncStorage(userInfo.idToken);
+                await saveAccessTokenInAsyncStorage(res.accessToken!);//todo: if undefine?
+                await saveRefreshTokenInAsyncStorage(res.refreshToken!);//todo: if undefine?
+                await (res._id! && saveUserIdInAsyncStorage(res._id!));//todo: if undefine?
+                console.log("id token: ", userInfo.idToken);
+                setUserId(res._id!);
+                setAccessToken(res.accessToken!);
+                setGoogleAccessToken(tokensFromGoogle.accessToken);
             }
         } catch (error) {
             console.log("Failed to sign-in with google account...");
