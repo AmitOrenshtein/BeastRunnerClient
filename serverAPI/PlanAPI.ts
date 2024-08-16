@@ -30,4 +30,10 @@ export const PlanAPI = {
       updatedPlan
     });
   },
+
+  setUserData:  async function setUserData(userPreferences: UserPreferences):Promise<AxiosResponse<boolean>> {
+    return api.post('/setUserData', {
+      userPreferences
+    })
+  }
 };

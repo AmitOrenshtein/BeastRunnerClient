@@ -4,23 +4,19 @@ import Stepper from "react-native-stepper-ui";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import UserLevel from "./UserLevel";
 import UserGoal from "./UserGoal";
-import { Gender, UserPreferences } from "../types/user";
+import { Gender, UserFitnessData, UserPreferences } from "../types/user";
 import PlanDates from "./PlanDates";
 import { router } from "expo-router";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
+import UserData from "./UserData";
 
 enum Attributes {
+  gender = "gender",
+  age = "age",
   userRunningLevel = "userRunningLevel",
   userRunningGoal = "userRunningGoal",
   startDate = "startDate",
   endDate = "endDate",
-}
-
-interface GoogleFitData {
-  age: number;
-  gender: Gender;
-  height: number;
-  weight: number;
 }
 
 const CreateNewPlan: FC = () => {
@@ -28,9 +24,7 @@ const CreateNewPlan: FC = () => {
   const [generatePlanloading, setGeneratePlanloading] =
     useState<boolean>(false);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>();
-  const [googleFitData, setGoogleFitData] = useState<GoogleFitData>({
-    age: 24,
-    gender: Gender.male,
+  const [googleFitData, setGoogleFitData] = useState<UserFitnessData>({
     height: 0,
     weight: 0,})
   const {
@@ -59,6 +53,12 @@ const fetchGoogleFitData = async () => {
         userFitnessData: googleFitData,
       });
       console.log(plan);
+      if (userPreferences) {
+        const response = PlanAPI.setUserData(userPreferences);
+        if(!response) {
+          console.log('error - can not save user data')
+        }
+      }
       setGeneratePlanloading(false);
       router.replace("/MyTrainingPlan");
     } catch (error) {
@@ -79,6 +79,12 @@ const fetchGoogleFitData = async () => {
     };
 
   const content = [
+    <UserData
+      gender={userPreferences?.gender || null}
+      age={userPreferences?.age || ''}
+      dispatchUserGender={handleChangePreferences(Attributes.gender)}
+      dispatchUserAge={handleChangePreferences(Attributes.age)}
+    />,
     <UserLevel
       userLevel={userPreferences?.userRunningLevel || ""}
       dispatchUserLevel={handleChangePreferences(Attributes.userRunningLevel)}
