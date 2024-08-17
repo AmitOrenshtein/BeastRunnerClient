@@ -27,9 +27,9 @@ export default function TabsLayout() {
                 'https://www.googleapis.com/auth/fitness.heart_rate.read'
             ],
             // @ts-ignore
-            androidClientId: "your_androidClientId",//todo: get from env file,
-            webClientId: 'your_webClientId', //todo: get from env file,
-            iosClientId: "your_iosClientId",//todo: get from env file,
+            androidClientId: "1067294308521-cd8c4ki4l306o3rsj7itome7r48pivev.apps.googleusercontent.com",
+            webClientId: '1067294308521-71ba0309ksnqqv5bavo6blekkqssuns4.apps.googleusercontent.com',
+            iosClientId: "1067294308521-eafi2j6997ajuq7v7c2m9ltk92qae59o.apps.googleusercontent.com",
         });
     }
 

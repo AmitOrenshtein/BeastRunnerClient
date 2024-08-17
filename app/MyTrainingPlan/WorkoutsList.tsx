@@ -2,19 +2,22 @@ import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
-import { WeeklyPlan, Workout } from "../types/training";
+import { IsRePlanNeededValues, WeeklyPlan, Workout } from "../types/training";
 import EditWorkout from "./EditWorkout";
 const { width, height } = Dimensions.get("window");
 import { Icon } from "react-native-elements";
 import { Card, Button } from "react-native-paper";
 import WorkoutFeedback from "./workoutFeedback";
 import { useFocusEffect } from "@react-navigation/native";
+import RePlanWorkouts from "./RePlanWorkouts";
 
 export const BasicTimeline = () => {
   const [editPlanModalVisible, setEditPlanModalVisible] =
     useState<boolean>(false);
   const [feedbackModalVisible, setFeedbackModalVisible] =
     useState<boolean>(false);
+  const [isRePlanNeeded, setIsRePlanNeeded] =
+    useState<IsRePlanNeededValues>(IsRePlanNeededValues.NoNeedForRePlan);
   const [editedWorkout, setEditedWorkout] = useState<Workout>({
     date: new Date(),
     workout: "",
@@ -113,7 +116,12 @@ export const BasicTimeline = () => {
         modalVisible={feedbackModalVisible}
         setModalVisible={setFeedbackModalVisible}
         workout={editedWorkout}
+        replanHanler={setIsRePlanNeeded}
       />
+      <RePlanWorkouts 
+        isRePlanNeeded={isRePlanNeeded} 
+        setIsRePlanNeeded={setIsRePlanNeeded} 
+        setPlan={setPlan} />
     </>
   );
 };

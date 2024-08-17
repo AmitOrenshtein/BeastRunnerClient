@@ -17,3 +17,14 @@ export interface PlanResponse {
     _id: string;
     lut: Date;
 }
+
+export interface UpdatePlanResponse {
+    updatedPlan: PlanResponse;
+    rePlanNeeded: IsRePlanNeededValues;
+}
+
+export enum IsRePlanNeededValues {
+    ToHard = 1,
+    NoNeedForRePlan = 0,
+    ToEasy = -1
+}

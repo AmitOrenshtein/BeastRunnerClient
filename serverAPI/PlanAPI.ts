@@ -1,6 +1,6 @@
 import api from "./config/axiosConfig";
 import { UserFitnessData, UserPreferences } from "../app/types/user";
-import { PlanResponse, WeeklyPlan, Workout } from "@/app/types/training";
+import { IsRePlanNeededValues, PlanResponse, UpdatePlanResponse, WeeklyPlan, Workout } from "@/app/types/training";
 import { AxiosResponse } from "axios";
 
 interface GeneratePlanI {
@@ -25,9 +25,13 @@ export const PlanAPI = {
     return api.get('/getWorkout', {params: { date }})
   },
 
-  updatePlan: async function (updatedPlan: WeeklyPlan[]):Promise<AxiosResponse<PlanResponse>> {
+  updatePlan: async function (updatedPlan: WeeklyPlan[]):Promise<AxiosResponse<UpdatePlanResponse>> {
     return api.post('/updatePlan', {
       updatedPlan
     });
+  },
+
+  rePlanWorkoutPlan: async function (rePlanValue: IsRePlanNeededValues):Promise<AxiosResponse<PlanResponse>> {
+    return api.post('/rePlan', {rePlanValue: rePlanValue});
   },
 };
