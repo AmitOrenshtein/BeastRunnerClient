@@ -41,7 +41,7 @@ export const BasicTimeline = () => {
               key={workout.date.toString()}
             >
               <Text style={styles.dateText}>
-                {moment(workout.date).format("ll")}
+                {workout.date as string}
               </Text>
               <Card style={styles.card}>
                 <Card.Content>
