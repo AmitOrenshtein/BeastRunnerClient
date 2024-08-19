@@ -37,7 +37,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
             }
         }>
         <View style={styles.modalView}>
-            <Text style={styles.modalText}>{moment(workout.date).format('ll')}</Text>
+            <Text style={styles.modalText}>{workout.date}</Text>
             <TextInput
                 keyboardType="numeric"
                 style={{marginVertical:5}}
