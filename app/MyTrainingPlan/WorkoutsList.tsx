@@ -17,7 +17,12 @@ export const BasicTimeline = () => {
     useState<boolean>(false);
   const [editedWorkout, setEditedWorkout] = useState<Workout>({
     date: new Date(),
-    workout: "",
+    workout: {
+      title: '',
+      distance: '',
+      workoutTime: '',
+      description: '',
+    },
   });
   const [plan, setPlan] = useState<WeeklyPlan[]>([]);
 
@@ -45,11 +50,19 @@ export const BasicTimeline = () => {
               </Text>
               <Card style={styles.card}>
                 <Card.Content>
-                  <View style={{ width: "100%" }}>
+                  <View style={{ width: "100%"}}>
                     <View style={styles.row}>
-                      <Text style={{ fontSize: 13, color: "#5384cf" }}>
-                        {workout.workout}
-                      </Text>
+                      <View>
+                        <Text style={{ fontSize: 13, color: "#5384cf" }}>
+                          {workout.workout.title}
+                        </Text>
+                        <Text style={{ fontSize: 10, color: "#5384cf" }}>
+                          {workout.workout.description}
+                        </Text>
+                        {!workout.workout.title.toLowerCase().includes('rest') && <Text style={{ fontSize: 10, color: "#5384cf" }}>
+                          {`distance: ${workout.workout.distance} | time: ${workout.workout.workoutTime}`}
+                        </Text>}
+                      </View>
                       {moment().isBefore(workout.date) && (
                         <Pressable
                           onPress={() => {

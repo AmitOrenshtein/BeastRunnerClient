@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, AppState } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
 import { Notification } from '@/app/types/notification';
 import { NotificationAPI } from '@/serverAPI/NotificationAPI';
@@ -50,7 +50,7 @@ const NotificationModal = (props: NotificationModalProps) => {
         <Text style={styles.title}>Hi it's Skyler!</Text>
         {notifications.map((notification) => 
           <View key={notification._id} style={styles.notification}>
-            <Text>{`Workout Reminder for Today (${notification.date}) - ${notification.workout}`}</Text>
+            <Text>{`Workout Reminder for Today (${notification.date}) - ${notification.workout?.title}`}</Text>
             <Button onPress={() => removeNotification(notification._id)}>x</Button>
           </View>
         )}
