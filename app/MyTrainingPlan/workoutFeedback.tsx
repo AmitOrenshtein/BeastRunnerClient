@@ -1,4 +1,5 @@
-import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
+import { Text, View, StyleSheet, Pressable, Modal, Dimensions } from "react-native";
+const { width, height } = Dimensions.get("window");
 import {WeeklyPlan, Workout } from "../types/training";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
@@ -37,26 +38,24 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
             }
         }>
         <View style={styles.modalView}>
-            <Text style={styles.modalText}>{workout.date}</Text>
+            <Text style={styles.modalText}>{workout.date.toString()}</Text>
             <TextInput
                 keyboardType="numeric"
-                style={{marginVertical:5}}
+                style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
                 label={"Total time (minutes)"}
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
-                value={editedWorkout.completedTime || 0}
             />
             <TextInput
                 keyboardType="numeric"
-                style={{marginVertical:5}}
+                style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
                 label={"Completed distance (km)"}
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
-                value={editedWorkout.completedDistance || 0}
             />
             <Text style={styles.modalText}>How difficult was the workout?</Text>
             <SegmentedButtons
@@ -112,7 +111,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
 const styles = StyleSheet.create({
     modalView: {
         marginHorizontal:'10%',
-        marginVertical: '15vh',
+        marginVertical: width / 2,
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,

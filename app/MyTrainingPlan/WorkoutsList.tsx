@@ -56,14 +56,14 @@ export const BasicTimeline = () => {
                         <Text style={{ fontSize: 13, color: "#5384cf" }}>
                           {workout.workout.title}
                         </Text>
-                        <Text style={{ fontSize: 10, color: "#5384cf" }}>
+                        <Text style={{ fontSize: 12, color: "black", maxWidth:"90%" }}>
                           {workout.workout.description}
                         </Text>
-                        {!workout.workout.title.toLowerCase().includes('rest') && <Text style={{ fontSize: 10, color: "#5384cf" }}>
+                        {!workout.workout.title.toLowerCase().includes('rest') && <Text style={{ fontSize: 12, color: "#5384cf", maxWidth:"90%" }}>
                           {`distance: ${workout.workout.distance} | time: ${workout.workout.workoutTime}`}
                         </Text>}
                       </View>
-                      {moment().isBefore(workout.date) && (
+                      {moment().isBefore(moment(workout.date, "yyyy/MM/dd")) && (
                         <Pressable
                           onPress={() => {
                             setEditedWorkout(workout);
@@ -74,8 +74,8 @@ export const BasicTimeline = () => {
                         </Pressable>
                       )}
                     </View>
-                    {!moment().isBefore(workout.date) && (
-                      <View style={{ ...styles.row, marginTop: 6 }}>
+                    {!moment().isBefore(moment(workout.date, "yyyy/MM/dd")) && (
+                      <View style={{ ...styles.row, marginTop: 6, marginRight:15 }}>
                         {workout.completedDistance &&
                         workout.completedDistance ? (
                           <Text style={{ fontSize: 12, color: "#077a28" }}>
