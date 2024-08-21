@@ -20,7 +20,7 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
     const onSaveHandler = () => {
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
-                moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
+                moment(workout.date, "YYYY-MM-DD").utc(true).toString() === moment(day.date, "YYYY-MM-DD").utc(true).toString() ? 
             editedWorkout : day) }))
             PlanAPI.updatePlan(updatedPlan).then((res) => {
                 setPlan(res.data.plan);
@@ -43,11 +43,36 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
                 style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
                 mode="outlined"
+                label={"description"}
                 editable
                 multiline
                 numberOfLines={2}
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, workout: {...editedWorkout.workout, description: text}})}
                 value={editedWorkout.workout.description}
+            />
+                        <TextInput
+                style={{maxHeight: height / 10, width: width / 2}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                mode="outlined"
+                keyboardType="numeric"
+                label={"distance"}
+                editable
+                multiline
+                numberOfLines={2}
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, workout: {...editedWorkout.workout, distance: text}})}
+                value={editedWorkout.workout.distance.toString()}
+            />
+                        <TextInput
+                style={{maxHeight: height / 10, width: width / 2}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                mode="outlined"
+                keyboardType="numeric"
+                label={"workoutTime"}
+                editable
+                multiline
+                numberOfLines={2}
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, workout: {...editedWorkout.workout, workoutTime: text}})}
+                value={editedWorkout.workout.workoutTime.toString()}
             />
           <View style={{flexDirection:"row"}}>
             <Pressable
@@ -69,7 +94,8 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
 const styles = StyleSheet.create({
     modalView: {
         marginHorizontal:'10%',
-        marginVertical: width / 2,
+        marginVertical: height / 5,
+        minHeight: height / 2.5,
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,

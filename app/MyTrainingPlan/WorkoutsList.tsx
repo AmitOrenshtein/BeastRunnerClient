@@ -60,10 +60,10 @@ export const BasicTimeline = () => {
                           {workout.workout.description}
                         </Text>
                         {!workout.workout.title.toLowerCase().includes('rest') && <Text style={{ fontSize: 12, color: "#5384cf", maxWidth:"90%" }}>
-                          {`distance: ${workout.workout.distance} | time: ${workout.workout.workoutTime}`}
+                          {`${workout.workout.distance} miles | ${workout.workout.workoutTime} minutes`}
                         </Text>}
                       </View>
-                      {moment().isBefore(moment(workout.date, "yyyy/MM/dd")) && (
+                      {moment().isBefore(moment(workout.date, "YYYY-MM-DD").utc(true)) && (
                         <Pressable
                           onPress={() => {
                             setEditedWorkout(workout);
@@ -74,13 +74,13 @@ export const BasicTimeline = () => {
                         </Pressable>
                       )}
                     </View>
-                    {!moment().isBefore(moment(workout.date, "yyyy/MM/dd")) && (
+                    {!moment().isBefore(moment(workout.date, "YYYY-MM-DD").utc(true)) && (
                       <View style={{ ...styles.row, marginTop: 6, marginRight:15 }}>
                         {workout.completedDistance &&
                         workout.completedDistance ? (
                           <Text style={{ fontSize: 12, color: "#077a28" }}>
-                            {workout.completedTime}" |{" "}
-                            {workout.completedDistance} KM
+                            {workout.completedTime} miles |{" "}
+                            {workout.completedDistance} minutes
                           </Text>
                         ) : (
                           <Text></Text>

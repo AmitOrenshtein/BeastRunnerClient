@@ -7,7 +7,7 @@ import { Divider, Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { SegmentedButtons, TextInput } from 'react-native-paper';
 
-export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}: 
+export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}:
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
         workout: Workout,
         modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
@@ -20,7 +20,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
     const onSaveHandler = () => {
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
-                moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
+                moment(workout.date, "YYYY-MM-DD").utc(true).toString() === moment(day.date, "YYYY-MM-DD").utc(true).toString() ? 
             editedWorkout : day) }))
             PlanAPI.updatePlan(updatedPlan).then((res) => {
                 setPlan(res.data.plan);
@@ -43,7 +43,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
                 keyboardType="numeric"
                 style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
-                label={"Total time (minutes)"}
+                label={"Total time"}
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
@@ -52,7 +52,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
                 keyboardType="numeric"
                 style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
-                label={"Completed distance (km)"}
+                label={"Completed distance"}
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
@@ -111,7 +111,8 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
 const styles = StyleSheet.create({
     modalView: {
         marginHorizontal:'10%',
-        marginVertical: width / 2,
+        marginVertical: height / 5,
+        minHeight: height / 2.5,
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,
