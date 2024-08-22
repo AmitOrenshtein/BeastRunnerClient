@@ -85,7 +85,18 @@ export const BasicTimeline = () => {
                         ) : (
                           <Text></Text>
                         )}
+                        {!!workout.difficultyFeedback || !workout.workout.workoutTime ?
                         <Button
+                        textColor="gray"
+                        style={{borderRadius: 0 }}
+                        onPress={() => {
+                          setEditedWorkout(workout);
+                          setFeedbackModalVisible(true);
+                        }}
+                      >
+                        edit feedback
+                      </Button> : 
+                          <Button
                           textColor="white"
                           style={{ backgroundColor: "gray", borderRadius: 4 }}
                           onPress={() => {
@@ -94,7 +105,7 @@ export const BasicTimeline = () => {
                           }}
                         >
                           feedback
-                        </Button>
+                        </Button>}
                       </View>
                     )}
                   </View>
