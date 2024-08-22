@@ -1,12 +1,11 @@
 import api from "@/serverAPI/config/axiosConfig";
 import {Tokens} from "@/app/types/tokens";
-import {IUser, UserPreferences} from "@/app/types/user";
+import {IUser} from "@/app/types/user";
 import {
     getRefreshTokenFromAsyncStorage,
     saveAccessTokenInAsyncStorage,
     saveRefreshTokenInAsyncStorage
 } from "@/app/utils/AsyncStorageUtil";
-import { AxiosResponse } from "axios";
 
 export const googleSignin = (idToken: string) => {
     console.log("In googleSignin server func...")

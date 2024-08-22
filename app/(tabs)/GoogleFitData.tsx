@@ -1,23 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
-import {useGoogleFit} from "@/app/context/GoogleFitContext";
-import {getAllDataSource} from "@/app/utils/googleAxiosConfig";
+import {formatMillisToDateTime, SessionData, useGoogleFit} from "@/app/context/GoogleFitContext";
 
 
 const GoogleFitData = () => {
     const {
         googleAccessTokenState,
-        getAllRunningSessions,
-        getAllWalkingSessions,
-        getRunningSummary,
-        getCaloriesBurnedSummary,
-        getHeartPointSummary,
-        getMoveMinutesSummary,
-        getStepsCountSummary,
         getHeightSummary,
         getWeightSummary,
-        getDurationSummary,
-        getSpeedSummary,
+        fetchSessionsDataFromGoogleFit
     } = useGoogleFit();
 
     const [data, setData] = useState<any>(null);
@@ -33,51 +24,27 @@ const GoogleFitData = () => {
 
         const fetchGoogleFitData = async () => {
             try {
-                await getAllDataSource();//todo:to delete after det all needed data from google fit
+                // await getAllDataSource();//todo:to delete after det all needed data from google fit
 
-                const startTime = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
+                const startTime = Date.now() - 60 * 24 * 60 * 60 * 1000; // Last 90 days
                 const endTime = Date.now();
 
                 // Fetch data from Google Fit API
                 const [
-                    runningSessions,
-                    walkingSessions,
-                    runningSummary,
-                    caloriesBurnedSummary,
-                    heartPointSummary,
-                    moveMinutesSummary,
-                    stepsCountSummary,
-                    heightSummary,
-                    weightSummary,
-                    durationSummary,
-                    speedSummary,
+                    // heightSummary,
+                    // weightSummary,
+                    fetchedSessions
                 ] = await Promise.all([
-                    getAllRunningSessions(startTime, endTime),
-                    getAllWalkingSessions(startTime, endTime),
-                    getRunningSummary(startTime, endTime),
-                    getCaloriesBurnedSummary(startTime, endTime),
-                    getHeartPointSummary(startTime, endTime),
-                    getMoveMinutesSummary(startTime, endTime),
-                    getStepsCountSummary(startTime, endTime),
-                    getHeightSummary(startTime, endTime),
-                    getWeightSummary(startTime, endTime),
-                    getDurationSummary(startTime, endTime),
-                    getSpeedSummary(startTime, endTime),
+                    // getHeightSummary(startTime, endTime),
+                    // getWeightSummary(startTime, endTime),
+                    fetchSessionsDataFromGoogleFit(startTime, endTime)
                 ]);
 
                 // Set fetched data
                 setData({
-                    runningSessions,
-                    walkingSessions,
-                    runningSummary,
-                    caloriesBurnedSummary,
-                    heartPointSummary,
-                    moveMinutesSummary,
-                    stepsCountSummary,
-                    heightSummary,
-                    weightSummary,
-                    durationSummary,
-                    speedSummary,
+                    // heightSummary,
+                    // weightSummary,
+                    fetchedSessions,
                 });
             } catch (err) {
                 console.error('Error fetching Google Fit data:', err);
@@ -102,41 +69,27 @@ const GoogleFitData = () => {
         <View style={styles.container}>
             {data ? (
                 <ScrollView>
-                    <Text style={styles.title}>Running Sessions:</Text>
-                    <Text>{JSON.stringify(data.runningSessions)}</Text>
+                    {/*<Text style={styles.title}>Height Summary:</Text>*/}
+                    {/*<Text>{JSON.stringify(data.heightSummary)}</Text>*/}
 
-                    <Text style={styles.title}>Walking Sessions:</Text>
-                    <Text>{JSON.stringify(data.walkingSessions)}</Text>
+                    {/*<Text style={styles.title}>Weight Summary:</Text>*/}
+                    {/*<Text>{JSON.stringify(data.weightSummary)}</Text>*/}
 
-                    <Text style={styles.title}>Running Summary:</Text>
-                    <Text>{JSON.stringify(data.runningSummary)}</Text>
-
-                    <Text style={styles.title}>Walking Summary:</Text>
-                    <Text>{JSON.stringify("Needs to implement")}</Text>
-
-                    <Text style={styles.title}>Calories Burned Summary:</Text>
-                    <Text>{JSON.stringify(data.caloriesBurnedSummary)}</Text>
-
-                    <Text style={styles.title}>Heart Points Summary:</Text>
-                    <Text>{JSON.stringify(data.heartPointSummary)}</Text>
-
-                    <Text style={styles.title}>Move Minutes Summary:</Text>
-                    <Text>{JSON.stringify(data.moveMinutesSummary)}</Text>
-
-                    <Text style={styles.title}>Steps Count Summary:</Text>
-                    <Text>{JSON.stringify(data.stepsCountSummary)}</Text>
-
-                    <Text style={styles.title}>Height Summary:</Text>
-                    <Text>{JSON.stringify(data.heightSummary)}</Text>
-
-                    <Text style={styles.title}>Weight Summary:</Text>
-                    <Text>{JSON.stringify(data.weightSummary)}</Text>
-
-                    <Text style={styles.title}>Duration Summary:</Text>
-                    <Text>{JSON.stringify(data.durationSummary)}</Text>
-
-                    <Text style={styles.title}>Speed Summary:</Text>
-                    <Text>{JSON.stringify(data.speedSummary)}</Text>
+                    <Text style={styles.title}>Fetched Sessions:</Text>
+                    {data.fetchedSessions.map((session: SessionData, index: React.Key | null | undefined) => (
+                        <View key={index}>
+                            <Text>***************************************</Text>
+                            <Text>Activity Type: {session.activityType}</Text>
+                            <Text>Duration: {session.duration} minutes</Text>
+                            <Text>Start Time: {formatMillisToDateTime(session.startTime)}</Text>
+                            <Text>End Time: {formatMillisToDateTime(session.endTime)}</Text>
+                            <Text>Distance: {session.distance} meter</Text>
+                            <Text>Heart Points: {session.heartPoints}</Text>
+                            <Text>Calories: {session.calories} kcal</Text>
+                            <Text>Steps Count: {session.stepsCount} steps</Text>
+                            <Text>Speed: {session.speed}</Text>
+                        </View>
+                    ))}
                 </ScrollView>
             ) : (
                 <Text>No data available</Text>
