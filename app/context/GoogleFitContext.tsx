@@ -8,8 +8,8 @@ import googleApi from "@/app/utils/googleAxiosConfig";
 export interface SessionData {
     activityType: string;
     duration: number; // In minutes
-    startTime: string; //In milliseconds
-    endTime: string; //In milliseconds
+    startTime: number; //In milliseconds
+    endTime: number; //In milliseconds
     distance: number; // In meters
     heartPoints: number;
     calories: number;
