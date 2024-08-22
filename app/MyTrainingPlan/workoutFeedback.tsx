@@ -1,4 +1,5 @@
-import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
+import { Text, View, StyleSheet, Pressable, Modal, Dimensions } from "react-native";
+const { width, height } = Dimensions.get("window");
 import {WeeklyPlan, Workout } from "../types/training";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
@@ -6,7 +7,7 @@ import { Divider, Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { SegmentedButtons, TextInput } from 'react-native-paper';
 
-export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}: 
+export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}:
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
         workout: Workout,
         modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
@@ -19,7 +20,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
     const onSaveHandler = () => {
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
-                moment(workout.date).format("DD/MM/YY") === moment(day.date).format("DD/MM/YY") ? 
+                moment(workout.date, "YYYY-MM-DD").utc(true).toString() === moment(day.date, "YYYY-MM-DD").utc(true).toString() ? 
             editedWorkout : day) }))
             PlanAPI.updatePlan(updatedPlan).then((res) => {
                 setPlan(res.data.plan);
@@ -37,26 +38,24 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
             }
         }>
         <View style={styles.modalView}>
-            <Text style={styles.modalText}>{moment(workout.date).format('ll')}</Text>
+            <Text style={styles.modalText}>{workout.date.toString()}</Text>
             <TextInput
                 keyboardType="numeric"
-                style={{marginVertical:5}}
+                style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
-                label={"Total time (minutes)"}
+                label={"Total time"}
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
-                value={editedWorkout.completedTime || 0}
             />
             <TextInput
                 keyboardType="numeric"
-                style={{marginVertical:5}}
+                style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
-                label={"Completed distance (km)"}
+                label={"Completed distance"}
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
-                value={editedWorkout.completedDistance || 0}
             />
             <Text style={styles.modalText}>How difficult was the workout?</Text>
             <SegmentedButtons
@@ -112,7 +111,8 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
 const styles = StyleSheet.create({
     modalView: {
         marginHorizontal:'10%',
-        marginVertical: '15vh',
+        marginVertical: height / 5,
+        minHeight: height / 2.5,
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,

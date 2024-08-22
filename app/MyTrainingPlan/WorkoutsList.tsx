@@ -17,7 +17,12 @@ export const BasicTimeline = () => {
     useState<boolean>(false);
   const [editedWorkout, setEditedWorkout] = useState<Workout>({
     date: new Date(),
-    workout: "",
+    workout: {
+      title: '',
+      distance: '',
+      workoutTime: '',
+      description: '',
+    },
   });
   const [plan, setPlan] = useState<WeeklyPlan[]>([]);
 
@@ -45,12 +50,20 @@ export const BasicTimeline = () => {
               </Text>
               <Card style={styles.card}>
                 <Card.Content>
-                  <View style={{ width: "100%" }}>
+                  <View style={{ width: "100%"}}>
                     <View style={styles.row}>
-                      <Text style={{ fontSize: 13, color: "#5384cf" }}>
-                        {workout.workout}
-                      </Text>
-                      {moment().isBefore(workout.date) && (
+                      <View>
+                        <Text style={{ fontSize: 13, color: "#5384cf" }}>
+                          {workout.workout.title}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: "black", maxWidth:"90%" }}>
+                          {workout.workout.description}
+                        </Text>
+                        {!workout.workout.title.toLowerCase().includes('rest') && <Text style={{ fontSize: 12, color: "#5384cf", maxWidth:"90%" }}>
+                          {`${workout.workout.distance} miles | ${workout.workout.workoutTime} minutes`}
+                        </Text>}
+                      </View>
+                      {moment().isBefore(moment(workout.date, "YYYY-MM-DD").utc(true)) && (
                         <Pressable
                           onPress={() => {
                             setEditedWorkout(workout);
@@ -61,13 +74,13 @@ export const BasicTimeline = () => {
                         </Pressable>
                       )}
                     </View>
-                    {!moment().isBefore(workout.date) && (
-                      <View style={{ ...styles.row, marginTop: 6 }}>
+                    {!moment().isBefore(moment(workout.date, "YYYY-MM-DD").utc(true)) && (
+                      <View style={{ ...styles.row, marginTop: 6, marginRight:15 }}>
                         {workout.completedDistance &&
                         workout.completedDistance ? (
                           <Text style={{ fontSize: 12, color: "#077a28" }}>
-                            {workout.completedTime}" |{" "}
-                            {workout.completedDistance} KM
+                            {workout.completedTime} miles |{" "}
+                            {workout.completedDistance} minutes
                           </Text>
                         ) : (
                           <Text></Text>
