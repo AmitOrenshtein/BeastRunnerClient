@@ -47,6 +47,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
+                defaultValue={workout.completedTime?.toString()}
             />
             <TextInput
                 keyboardType="numeric"
@@ -56,12 +57,13 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
                 mode="outlined"
                 editable
                 onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
+                defaultValue={workout.completedDistance?.toString()}
             />
             <Text style={styles.modalText}>How difficult was the workout?</Text>
             <SegmentedButtons
                 style={{marginVertical:10}}
                 density="medium"
-                value={editedWorkout.difficultyFeedback?.toString() || "3"}
+                value={editedWorkout.difficultyFeedback?.toString() || "0"}
                 onValueChange={(text) => setEditedWorkout({...editedWorkout, difficultyFeedback:Number.parseInt(text)})}
                 buttons={[
                 {

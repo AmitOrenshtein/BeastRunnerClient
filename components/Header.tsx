@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Badge, Header} from 'react-native-elements';
 import appTheme from '../appTheme';
@@ -43,13 +43,36 @@ export default function AppHeader() {
       });
     }
 
+    // useEffect(() => {
+    //   fetchNotificationsNumber();
+    //
+    //   const intervalId = setInterval(fetchNotificationsNumber, 60000);
+    //
+    //   return () => clearInterval(intervalId);
+    // }, []);
+
+    const intervalRef = useRef<null|NodeJS.Timeout>(null); // Initialize the ref with null
+
     useEffect(() => {
-      fetchNotificationsNumber();
+        // Clear any existing interval whenever accessTokenState changes
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null; // Reset the ref after clearing the interval
+        }
 
-      const intervalId = setInterval(fetchNotificationsNumber, 60000);
+        // If accessTokenState exists, set up a new interval
+        if (accessTokenState) {
+            fetchNotificationsNumber(); // Fetch notifications immediately
+            intervalRef.current = setInterval(fetchNotificationsNumber, 60000);
+        }
 
-      return () => clearInterval(intervalId);
-    }, []);
+        // Cleanup function to clear the interval when the component unmounts
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, [accessTokenState]);
 
     const handleLogout = async () => {
         try {

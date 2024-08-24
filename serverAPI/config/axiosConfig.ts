@@ -23,6 +23,7 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 });
 
 function authBypass(config: InternalAxiosRequestConfig) {
+    console.log("authBypass: ", config.url!, config.url!.startsWith('/auth/refresh') || config.url!.startsWith('/auth/logout'))
     return config.url!.startsWith('/auth/refresh') || config.url!.startsWith('/auth/logout');
 }
 
@@ -35,7 +36,7 @@ api.interceptors.response.use(
     },
     async (error: AxiosError) => {
         const originalRequest = error.config;
-        if ((error.response?.status === 401 || error.response?.status === 403) && originalRequest?.url !== "/auth/login") {
+        if ((error.response?.status === 401 || error.response?.status === 403) && originalRequest?.url !== "/auth/login" && !authBypass(originalRequest!)) {
             if (!isRefreshing) {
                 console.log("Server access token has expired, about to refresh tokens...")
                 isRefreshing = true;
