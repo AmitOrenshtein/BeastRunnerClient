@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment, { duration } from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
@@ -9,8 +9,10 @@ import { Icon } from "react-native-elements";
 import { Card, Button } from "react-native-paper";
 import WorkoutFeedback from "./workoutFeedback";
 import { useFocusEffect } from "@react-navigation/native";
+import { useGoogleFit } from "../context/GoogleFitContext";
 
 export const BasicTimeline = () => {
+  const {fetchSessionsDataFromGoogleFit} = useGoogleFit();
   const [editPlanModalVisible, setEditPlanModalVisible] =
     useState<boolean>(false);
   const [feedbackModalVisible, setFeedbackModalVisible] =
@@ -29,7 +31,19 @@ export const BasicTimeline = () => {
   useFocusEffect(
     useCallback(() => {
       PlanAPI.getPlan().then((res) => {
-        res?.data?.plan?.length ? setPlan(res.data.plan) : setPlan([]);
+        const newPlan = [...res.data.plan];
+        const startTime = Date.now() - 60 * 24 * 60 * 60 * 1000; // Last 90 days
+        const endTime = Date.now();
+        fetchSessionsDataFromGoogleFit(startTime, endTime).then(sessions => {
+          setPlan(newPlan.map(week => ({week: week.week, days: week.days.map(day => {
+            const dailySession = sessions.find(session => moment(new Date(+session.startTime)).format('ll') === moment(day.date, "YYYY-MM-DD").utc(true).format('ll'));
+            if(dailySession)
+              return {...day, completedDistance: +(dailySession.distance / 1609).toFixed(0), completedTime: +((dailySession.endTime - dailySession.startTime) / 60000).toFixed(0)}
+             else return day
+          })}
+        )))
+          setPlan(newPlan)
+        })
       });
     }, [])
   );
@@ -79,13 +93,24 @@ export const BasicTimeline = () => {
                         {workout.completedDistance &&
                         workout.completedDistance ? (
                           <Text style={{ fontSize: 12, color: "#077a28" }}>
-                            {workout.completedTime} miles |{" "}
-                            {workout.completedDistance} minutes
+                            {workout.completedDistance} miles |{" "}
+                            {workout.completedTime} minutes
                           </Text>
                         ) : (
                           <Text></Text>
                         )}
+                        {!!workout.difficultyFeedback || !workout.workout.workoutTime ?
                         <Button
+                        textColor="gray"
+                        style={{borderRadius: 0 }}
+                        onPress={() => {
+                          setEditedWorkout(workout);
+                          setFeedbackModalVisible(true);
+                        }}
+                      >
+                        edit feedback
+                      </Button> : 
+                          <Button
                           textColor="white"
                           style={{ backgroundColor: "gray", borderRadius: 4 }}
                           onPress={() => {
@@ -94,7 +119,7 @@ export const BasicTimeline = () => {
                           }}
                         >
                           feedback
-                        </Button>
+                        </Button>}
                       </View>
                     )}
                   </View>
