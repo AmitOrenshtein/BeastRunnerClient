@@ -1,4 +1,4 @@
-import React, {createContext, useCallback, useContext, useEffect, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 import GoogleFit, {Scopes} from 'react-native-google-fit';
 import {getGoogleAccessTokenFromAsyncStorage} from "@/app/utils/AsyncStorageUtil";
 import googleApi from "@/app/utils/googleAxiosConfig";
@@ -8,8 +8,8 @@ import googleApi from "@/app/utils/googleAxiosConfig";
 export interface SessionData {
     activityType: string;
     duration: number; // In minutes
-    startTime: string; //In milliseconds
-    endTime: string; //In milliseconds
+    startTime: number; //In milliseconds
+    endTime: number; //In milliseconds
     distance: number; // In meters
     heartPoints: number;
     calories: number;
@@ -51,12 +51,15 @@ export const formatMillisToDateTime = (millisSeconds: string): string => {
 
     return `${day}/${month}/${year} (${hours}:${minutes})`;
 };
+
 interface GoogleFitContextProps {
     googleAccessTokenState: string | null;
     setGoogleAccessToken: (token: string | null) => void;
     configureGoogleFit: () => Promise<boolean>;
     getHeightSummary: (startTime: number, endTime: number) => Promise<any>;
+    getCurrentHeight: (startTime: number, endTime: number) => Promise<any>;
     getWeightSummary: (startTime: number, endTime: number) => Promise<any>;
+    getCurrentWeight:(startTime: number, endTime: number) => Promise<any>;
     fetchSessionsDataFromGoogleFit: (startTime: number, endTime: number) => Promise<SessionData[]>;
 }
 
@@ -66,7 +69,9 @@ const GoogleFitContext = createContext<GoogleFitContextProps | undefined>({
     },
     configureGoogleFit: async () => false,
     getHeightSummary: async () => [],
+    getCurrentHeight: async () => [],
     getWeightSummary: async () => [],
+    getCurrentWeight: async () => [],
     fetchSessionsDataFromGoogleFit: async () => []
 });
 
@@ -91,30 +96,30 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
         loadGoogleAccessToken();
     }, []);
 
-    const fetchData = useCallback(async (dataType: string, dataSourceId: string, startTime: number, endTime: number) => {
+    async function fetchData(dataType: string, dataSourceId: string, startTime: number, endTime: number) {
         console.log("about to fetch " + dataType + " from google fit.");
-        try {
-            const response = await googleApi.post(
+        return new Promise((resolve, reject) => {
+            googleApi.post(
                 `https://fitness.googleapis.com/fitness/v1/users/me/dataset:aggregate`,
                 {
                     aggregateBy: [
                         {
                             dataTypeName: dataType,
-                            dataSourceId: dataSourceId,
                         }
                     ],
-                    bucketByTime: {durationMillis: endTime - startTime},
+                    bucketByTime: {durationMillis: 86400000},//bucket by day
                     startTimeMillis: startTime,
                     endTimeMillis: endTime,
                 },
-            );
-            console.log("finished to fetch " + dataType + " for google fit: ", response.data);
-            return response.data;
-        } catch (error) {
-            console.error(`Error fetching data for ${dataType}:`, error);
-            throw error;
-        }
-    }, [googleAccessTokenState]);
+            ).then((response) => {
+                console.log("finished to fetch " + dataType + " for google fit: ", response.data);
+                resolve(response.data);
+            }).catch(error => {
+                console.error(`Error fetching data for ${dataType}:`, error);
+                reject(error);
+            })
+        })
+    }
 
     async function fetchSessionsDataFromGoogleFit(startTimeMillis: number, endTimeMillis: number): Promise<SessionData[]> {
         console.log("about to fetch google fit sessions data from google fit.");
@@ -141,11 +146,11 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
                             dataTypeName: "com.google.speed"
                         }
                     ],
-                    bucketBySession: { "minDurationMillis": 1 },
+                    bucketBySession: {"minDurationMillis": 1},
                     startTimeMillis: startTimeMillis.toString(),
                     endTimeMillis: endTimeMillis.toString()
                 }).then((response) => {
-                    console.log("aaaaa: ", response)
+                console.log("aaaaa: ", response)
                 const sessionData: SessionData[] = mapResponseToSessionData(response.data);
                 resolve(sessionData);
             }).catch(error => {
@@ -192,7 +197,7 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
                 });
             });
 
-            console.log([activityType, duration, startTime, endTime,distance, heartPoints, calories, stepsCount, speed]);
+            console.log([activityType, duration, startTime, endTime, distance, heartPoints, calories, stepsCount, speed]);
 
             return {
                 activityType,
@@ -234,32 +239,6 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
         }
     };
 
-
-    // // Function to get height summary
-    // const getHeightSummary = async (startTime: number, endTime: number): Promise<any> => {
-    //     const heightDataSourceId = 'derived:com.google.height:com.google.android.gms:merge_height';
-    //     return fetchData('com.google.height.summary', heightDataSourceId, startTime, endTime);
-    // };
-    //
-    // // Function to get weight summary
-    // const getWeightSummary = async (startTime: number, endTime: number): Promise<any> => {
-    //     const weightDataSourceId = 'derived:com.google.weight:com.google.android.gms:merge_weight';
-    //     return fetchData('com.google.weight.summary',weightDataSourceId, startTime, endTime);
-    // };
-
-
-
-    // const transformWeightData = (data: any): WeightData[] => {
-    //     return data.bucket.flatMap((bucket: any) =>
-    //         bucket.dataset.flatMap((dataset: any) =>
-    //             dataset.point.map((point: any) => ({
-    //                 date: point.startTimeNanos / 1e6,
-    //                 weight: point.value[0]?.fpVal || 0,
-    //             }))
-    //         )
-    //     );
-    // };
-
     const transformWeightData = (data: any): WeightData[] => {
         return data.bucket.flatMap((bucket: any) =>
             bucket.dataset.flatMap((dataset: any) =>
@@ -286,25 +265,6 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
         );
     };
 
-    // Function to convert timestamp to DD/MM/YYYY format
-    const formatDate = (timestamp: string): string => {
-        const date = new Date(parseInt(timestamp, 10));
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
-    // Function to convert nanoseconds to date in DD/MM/YYYY format
-    const formatNanoToDate = (nanos: string): string => {
-        // Convert nanoseconds to milliseconds by dividing by 1,000,000
-        const date = new Date(parseInt(nanos, 10) / 1_000_000);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
     // Function to convert nanoseconds to date with time (dd/mm/yyyy) (hh:mm)
     const formatNanoToDateTime = (nanoSeconds: string): string => {
         const millis = parseInt(nanoSeconds) / 1e6; // Convert nanoseconds to milliseconds
@@ -312,37 +272,53 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
     };
 
 
-
-
-    // Function to process sessions and filter by activity type
-    const processSessions = (data: any): Promise<SessionData[]> => {
-        return data.bucket.flatMap((bucket: any) =>
-            bucket.dataset.flatMap((dataset: any) =>
-                dataset.point
-                    .filter((point: any) => activityTypes[point.value[0].intVal]) // Filter running/walking
-                    .map(async (point: any) => ({
-                        activityType: activityTypes[point.value[0].intVal],
-                        duration: parseInt(point.value[1].intVal, 10) / 60_000, // Duration in minutes
-                        startDate: formatNanoToDateTime(point.startTimeNanos),
-                        endDate: formatNanoToDateTime(point.endTimeNanos),
-                        distance: 0
-                    }))
-            )
-        );
-    };
-
-
     // Function to get weight summary
     const getWeightSummary = async (startTime: number, endTime: number): Promise<WeightData[]> => {
-        const data = await fetchData('com.google.weight', 'derived:com.google.weight:com.google.android.gms:merge_weight', startTime, endTime);
-        return transformWeightData(data);
+        return new Promise<WeightData[]>((resolve, reject) => {
+            fetchData('com.google.weight', 'derived:com.google.weight:com.google.android.gms:merge_weight', startTime, endTime)
+                .then((response) => {
+                    resolve(transformWeightData(response));
+                }).catch(error => reject(error));
+        });
     };
+
+    //The last weight from last 3 months, if the user didn't enter any weight in the last 3 months, so reject...
+    const getCurrentWeight = async (startTime: number, endTime: number): Promise<WeightData> => {
+        return new Promise<WeightData>((resolve, reject) => {
+            getWeightSummary(startTime, endTime).then(response => {
+                if(response.length > 0){
+                    resolve(response.reverse()[0]);
+                } else {
+                    alert("We see you don't have an updated weight... Please enter your current weight in Google-Fit app");
+                    reject(new Error("The user don't have any updated weight from the last 90 days in Google-Fit..."))
+                }
+            }).catch(error => reject(error))
+        })
+    }
 
     // Function to get height summary
     const getHeightSummary = async (startTime: number, endTime: number): Promise<HeightData[]> => {
-        const data = await fetchData('com.google.height', 'derived:com.google.height:com.google.android.gms:merge_height', startTime, endTime);
-        return transformHeightData(data);
+        return new Promise<HeightData[]>((resolve, reject) => {
+            fetchData('com.google.height', 'derived:com.google.height:com.google.android.gms:merge_height', startTime, endTime)
+                .then(response => {
+                    resolve(transformHeightData(response));
+                }).catch(error => reject(error))
+        });
     };
+
+    //The last height from last 3 months, if the user didn't enter any height in the last 3 months, so reject...
+    const getCurrentHeight = async (startTime: number, endTime: number): Promise<HeightData> => {
+        return new Promise<HeightData>((resolve, reject) => {
+            getHeightSummary(startTime, endTime).then(response => {
+                if(response.length > 0){
+                    resolve(response.reverse()[0]);
+                } else {
+                    alert("We see you don't have an updated height... Please enter your current height in Google-Fit app");
+                    reject(new Error("The user don't have any updated height from the last 90 days in Google-Fit..."))
+                }
+            }).catch(error => reject(error))
+        })
+    }
 
 
     return (
@@ -352,7 +328,9 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
                 setGoogleAccessToken,
                 configureGoogleFit,
                 getHeightSummary,
+                getCurrentHeight,
                 getWeightSummary,
+                getCurrentWeight,
                 fetchSessionsDataFromGoogleFit
             }}
         >

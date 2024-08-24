@@ -7,7 +7,9 @@ const GoogleFitData = () => {
     const {
         googleAccessTokenState,
         getHeightSummary,
+        getCurrentHeight,
         getWeightSummary,
+        getCurrentWeight,
         fetchSessionsDataFromGoogleFit
     } = useGoogleFit();
 
@@ -24,26 +26,31 @@ const GoogleFitData = () => {
 
         const fetchGoogleFitData = async () => {
             try {
-                // await getAllDataSource();//todo:to delete after det all needed data from google fit
-
-                const startTime = Date.now() - 60 * 24 * 60 * 60 * 1000; // Last 90 days
+                const startTime = Date.now() - 60 * 24 * 60 * 60 * 1000; // Last 60 days
                 const endTime = Date.now();
+                const lastNinetyDays = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
 
                 // Fetch data from Google Fit API
                 const [
-                    // heightSummary,
-                    // weightSummary,
+                    heightSummary,
+                    currentHeight,
+                    weightSummary,
+                    currentWeight,
                     fetchedSessions
                 ] = await Promise.all([
-                    // getHeightSummary(startTime, endTime),
-                    // getWeightSummary(startTime, endTime),
+                    getHeightSummary(lastNinetyDays, endTime),
+                    getCurrentHeight(lastNinetyDays, endTime),
+                    getWeightSummary(lastNinetyDays, endTime),
+                    getCurrentWeight(lastNinetyDays, endTime),
                     fetchSessionsDataFromGoogleFit(startTime, endTime)
                 ]);
 
                 // Set fetched data
                 setData({
-                    // heightSummary,
-                    // weightSummary,
+                    heightSummary,
+                    currentHeight,
+                    weightSummary,
+                    currentWeight,
                     fetchedSessions,
                 });
             } catch (err) {
@@ -69,11 +76,17 @@ const GoogleFitData = () => {
         <View style={styles.container}>
             {data ? (
                 <ScrollView>
-                    {/*<Text style={styles.title}>Height Summary:</Text>*/}
-                    {/*<Text>{JSON.stringify(data.heightSummary)}</Text>*/}
+                    <Text style={styles.title}>Height Summary:</Text>
+                    <Text>{JSON.stringify(data.heightSummary)}</Text>
 
-                    {/*<Text style={styles.title}>Weight Summary:</Text>*/}
-                    {/*<Text>{JSON.stringify(data.weightSummary)}</Text>*/}
+                    <Text style={styles.title}>Current Height :</Text>
+                    <Text>{JSON.stringify(data.currentHeight)}</Text>
+
+                    <Text style={styles.title}>Weight Summary:</Text>
+                    <Text>{JSON.stringify(data.weightSummary)}</Text>
+
+                    <Text style={styles.title}>Current Weight :</Text>
+                    <Text>{JSON.stringify(data.currentWeight)}</Text>
 
                     <Text style={styles.title}>Fetched Sessions:</Text>
                     {data.fetchedSessions.map((session: SessionData, index: React.Key | null | undefined) => (
@@ -81,8 +94,8 @@ const GoogleFitData = () => {
                             <Text>***************************************</Text>
                             <Text>Activity Type: {session.activityType}</Text>
                             <Text>Duration: {session.duration} minutes</Text>
-                            <Text>Start Time: {formatMillisToDateTime(session.startTime)}</Text>
-                            <Text>End Time: {formatMillisToDateTime(session.endTime)}</Text>
+                            <Text>Start Time: {formatMillisToDateTime(session.startTime.toString())}</Text>
+                            <Text>End Time: {formatMillisToDateTime(session.endTime.toString())}</Text>
                             <Text>Distance: {session.distance} meter</Text>
                             <Text>Heart Points: {session.heartPoints}</Text>
                             <Text>Calories: {session.calories} kcal</Text>
