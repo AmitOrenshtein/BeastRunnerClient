@@ -12,7 +12,7 @@ interface Option {
   value: string;
 }
 
-const options: Option[] = [
+export const goalOptions: Option[] = [
   { label: "Increase Distance", value: "Increase Distance" },
   {
     label: "Improve Speed",
@@ -42,7 +42,7 @@ const UserGoal: FC<UserGoalProps> = ({ userGoal, dispatchUserGoal }) => {
         Choose your Goal:{" "}
       </Text>
       <RadioButton
-        options={options}
+        options={goalOptions}
         selectedOption={selectedOption}
         onSelect={handleSelect}
       />

@@ -16,7 +16,7 @@ interface GenderOption {
   value: Gender;
 }
 
-const genderOptions: GenderOption[] = [
+export const genderOptions: GenderOption[] = [
   { label: Gender.female, value: Gender.female },
   { label: Gender.male, value: Gender.male },
 ];

@@ -23,5 +23,6 @@ export interface IUser {
   email: string,
   _id?: string,
   accessToken?: string,
-  refreshToken?: string
+  refreshToken?: string,
+  userPreferences?: UserPreferences
 }

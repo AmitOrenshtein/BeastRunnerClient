@@ -12,7 +12,7 @@ interface Option {
   value: string;
 }
 
-const options: Option[] = [
+export const levelOptions: Option[] = [
   { label: "Beginner (little to non experience)", value: "Beginner" },
   {
     label: "Intermediate (comfortable running short distances)",
@@ -40,7 +40,7 @@ const UserLevel: FC<UserLevelProps> = ({ userLevel, dispatchUserLevel }) => {
         Choose your running level:{" "}
       </Text>
       <RadioButton
-        options={options}
+        options={levelOptions}
         selectedOption={selectedOption}
         onSelect={handleSelect}
       />
