@@ -43,7 +43,7 @@ export const BasicTimeline = () => {
           })}
         )))
           setPlan(newPlan)
-        })
+        }).catch(() => setPlan(newPlan))
       });
     }, [])
   );

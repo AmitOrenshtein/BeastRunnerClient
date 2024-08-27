@@ -20,17 +20,18 @@ export default function HomePage() {
 
   useFocusEffect(
     useCallback(() => {
-    PlanAPI.getPlan()
-      .then((res) => {
-        setIsUserHasPlan(res?.data?.plan?.length > 0);
-        setIsPlanLoading(false);
-      })
-      .catch((e) => {
-        setIsPlanLoading(false);
-        setIsError(true);
-        console.log(e);
-      });
-  }, []));
+      PlanAPI.getPlan()
+        .then((res) => {
+          setIsUserHasPlan(res?.data?.plan?.length > 0);
+          setIsPlanLoading(false);
+        })
+        .catch((e) => {
+          setIsPlanLoading(false);
+          setIsError(true);
+          console.log(e);
+        });
+    }, [])
+  );
 
   if (isError) {
     return (
