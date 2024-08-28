@@ -4,11 +4,13 @@ import Stepper from "react-native-stepper-ui";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import UserLevel from "./UserLevel";
 import UserGoal from "./UserGoal";
-import { Gender, UserFitnessData, UserPreferences } from "../types/user";
+import { UserFitnessData, UserPreferences } from "../types/user";
 import PlanDates from "./PlanDates";
 import { router } from "expo-router";
 import {useGoogleFit} from "@/app/context/GoogleFitContext";
 import UserData from "./UserData";
+import StartPage from "./startPageNewPlan";
+import appTheme from '../../appTheme';
 
 enum Attributes {
   gender = "gender",
@@ -36,13 +38,12 @@ const fetchGoogleFitData = async () => {
   try {
     const startTime = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
     const endTime = Date.now();
-      getHeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, height: res.bucket[0].dataset[0].point[0].value[0].fpVal})));
-      getWeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, weight: res.bucket[0].dataset[0].point[0].value[0].fpVal}))); 
+      getHeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, height: res[0].height})));
+      getWeightSummary(startTime, endTime).then(res => setGoogleFitData(data => ({...data, weight: res[0].weight}))); 
   } catch (error) {
-      console.log("Google Fit data fetch error: ", error);
+    console.log("Google Fit data fetch error: ", error);
   }
 };
-
   const generatePlan = async () => {
     setGeneratePlanloading(true);
 
@@ -79,6 +80,7 @@ const fetchGoogleFitData = async () => {
     };
 
   const content = [
+    <StartPage />,
     <UserData
       gender={userPreferences?.gender || null}
       age={userPreferences?.age || ''}
@@ -106,9 +108,11 @@ const fetchGoogleFitData = async () => {
   return (
     <View style={styles.container}>
       {generatePlanloading ? (
-        <ActivityIndicator size="large" color="#2ecc71" />
+        <ActivityIndicator size="large" color={appTheme.colors.themeColor} />
       ) : (
         <Stepper
+          stepStyle={{backgroundColor: appTheme.colors.themeColor}}
+          buttonStyle={{backgroundColor: appTheme.colors.themeColor, position:"static", margin: 40}}
           active={activeStep}
           content={content}
           onBack={() => setActiveStep((p) => p - 1)}
@@ -124,11 +128,6 @@ export default CreateNewPlan;
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-  },
-  button: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 25,
+    marginTop: 50,
   },
 });

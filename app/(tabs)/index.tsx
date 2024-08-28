@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import CreateNewPlan from "../CreateNewPlan";
+import appTheme from '../../appTheme';
+
 
 export default function HomePage() {
   const userName = "User";
@@ -42,7 +44,7 @@ export default function HomePage() {
   }
 
   if (isPlanLoading) {
-    return <ActivityIndicator size="large" color="#2f93ab" />;
+    return <ActivityIndicator size="large" color={appTheme.colors.themeColor} />;
   }
 
   return isUserHasPlan ? (

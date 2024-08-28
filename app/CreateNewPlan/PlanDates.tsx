@@ -14,7 +14,7 @@ const PlanDates: FC<PropsI> = ({label, dispatchDate}) => {
   }
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 10 }}>
+      <Text style={{ fontSize: 25, fontWeight: 600, alignSelf: "center", margin: 30 }}>
         {label}
       </Text>
       <DatePicker
@@ -27,7 +27,7 @@ const PlanDates: FC<PropsI> = ({label, dispatchDate}) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: 300,
+    marginHorizontal: 40,
   },
 });
 

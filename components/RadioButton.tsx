@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import appTheme from '../appTheme';
 
 interface Option {
   label: string;
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
     width: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#b5cef7',
+    borderColor: appTheme.colors.themeColor,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -57,8 +58,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#b5cef7',
   },
   optionText: {
-    marginLeft: 10,
-    fontSize: 16,
+    marginLeft: 20,
+    fontSize: 20,
     color: '#000',
   },
 });
