@@ -16,23 +16,6 @@ export const googleSignin = (idToken: string) => {
     });
 }
 
-export function useRefreshToken(): Promise<Tokens> {
-    return new Promise<Tokens>(async (resolve, reject) => {
-        const refreshToken = await getRefreshTokenFromAsyncStorage();
-        console.log("Your refresh token from Async-Storage: ", refreshToken);
-        api.get('/auth/refresh', {
-            headers: {'Authorization': `Bearer ${refreshToken}`}
-        })
-            .then(async response => {
-                //Todo: use multiset instead...
-                await saveRefreshTokenInAsyncStorage(response.data.refreshToken);
-                await saveAccessTokenInAsyncStorage(response.data.accessToken);
-                resolve(response.data);
-            })
-            .catch((error) => reject(error));
-    });
-}
-
 export function logoutFromServer(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         const refreshToken = await getRefreshTokenFromAsyncStorage();

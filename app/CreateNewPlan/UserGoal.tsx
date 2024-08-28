@@ -38,14 +38,16 @@ const UserGoal: FC<UserGoalProps> = ({ userGoal, dispatchUserGoal }) => {
 
   return (
     <View>
-      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20 }}>
+      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20, alignSelf: "center", margin: 40 }}>
         Choose your Goal:{" "}
       </Text>
-      <RadioButton
-        options={goalOptions}
-        selectedOption={selectedOption}
-        onSelect={handleSelect}
-      />
+      <View style={{marginHorizontal: 40}}>
+        <RadioButton
+          options={goalOptions}
+          selectedOption={selectedOption}
+          onSelect={handleSelect}
+        />
+      </View>
     </View>
   );
 };

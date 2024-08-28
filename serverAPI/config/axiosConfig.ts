@@ -1,6 +1,6 @@
 import axios, {AxiosError, AxiosResponse, InternalAxiosRequestConfig} from "axios";
-import {getAccessTokenFromAsyncStorage} from "@/app/utils/AsyncStorageUtil";
-import {useRefreshToken} from "@/serverAPI/AuthAPI";
+import {getAccessTokenFromAsyncStorage, getRefreshTokenFromAsyncStorage, saveAccessTokenInAsyncStorage, saveRefreshTokenInAsyncStorage} from "@/app/utils/AsyncStorageUtil";
+import { Tokens } from "@/app/types/tokens";
 
 const headers = {
     'Content-Type': 'application/json'
@@ -93,5 +93,22 @@ const errorHandler = (error: { response: { status: any }; code: string }) => {
 api.interceptors.response.use(undefined, (error) => {
     return errorHandler(error);
 });
+
+function useRefreshToken(): Promise<Tokens> {
+    return new Promise<Tokens>(async (resolve, reject) => {
+        const refreshToken = await getRefreshTokenFromAsyncStorage();
+        console.log("Your refresh token from Async-Storage: ", refreshToken);
+        api.get('/auth/refresh', {
+            headers: {'Authorization': `Bearer ${refreshToken}`}
+        })
+            .then(async response => {
+                //Todo: use multiset instead...
+                await saveRefreshTokenInAsyncStorage(response.data.refreshToken);
+                await saveAccessTokenInAsyncStorage(response.data.accessToken);
+                resolve(response.data);
+            })
+            .catch((error) => reject(error));
+    });
+}
 
 export default api;

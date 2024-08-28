@@ -1,6 +1,7 @@
 const Colors = {
     themeColor: '#78CFE4',
-    white: 'white'
+    white: 'white',
+    darkBlue: '#38ACC9',
   };
   
   const FontSizes = {

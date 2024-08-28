@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import CreateNewPlan from "../CreateNewPlan";
+import appTheme from '../../appTheme';
+
 
 export default function HomePage() {
   const userName = "User";
@@ -20,17 +22,18 @@ export default function HomePage() {
 
   useFocusEffect(
     useCallback(() => {
-    PlanAPI.getPlan()
-      .then((res) => {
-        setIsUserHasPlan(res?.data?.plan?.length > 0);
-        setIsPlanLoading(false);
-      })
-      .catch((e) => {
-        setIsPlanLoading(false);
-        setIsError(true);
-        console.log(e);
-      });
-  }, []));
+      PlanAPI.getPlan()
+        .then((res) => {
+          setIsUserHasPlan(res?.data?.plan?.length > 0);
+          setIsPlanLoading(false);
+        })
+        .catch((e) => {
+          setIsPlanLoading(false);
+          setIsError(true);
+          console.log(e);
+        });
+    }, [])
+  );
 
   if (isError) {
     return (
@@ -41,7 +44,7 @@ export default function HomePage() {
   }
 
   if (isPlanLoading) {
-    return <ActivityIndicator size="large" color="#2f93ab" />;
+    return <ActivityIndicator size="large" color={appTheme.colors.themeColor} />;
   }
 
   return isUserHasPlan ? (
