@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {ScrollView, StyleSheet, Text, TextInput, View} from "react-native";
-import {Button, Card, Dialog, Portal, Provider as PaperProvider} from "react-native-paper";
+import {Button, Card, Dialog, IconButton, Paragraph, Portal, Provider as PaperProvider} from "react-native-paper";
 import Theme from "@/appTheme";
 import DropdownMenu from "@/components/DropdownMenu";
 import DateRangePicker from "@/components/DateRangePicker";
@@ -11,6 +11,7 @@ import {goalOptions} from "@/app/CreateNewPlan/UserGoal";
 import {Gender, UserFitnessData, UserPreferences} from "@/app/types/user";
 import {PlanAPI} from "@/serverAPI/PlanAPI";
 import {HeightData, useGoogleFit, WeightData} from "@/app/context/GoogleFitContext";
+import {defaultLoader} from "@/components/Loader";
 
 
 const GENDER_OPTIONS = genderOptions;
@@ -18,6 +19,16 @@ const GENDER_OPTIONS = genderOptions;
 const LEVEL_OPTIONS = levelOptions;
 
 const GOAL_OPTIONS = goalOptions;
+
+export const formatDate = (inputDate: string) => {
+    const date = new Date(inputDate);
+
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+}
 
 export default function MyTraining() {
     const [editMode, setEditMode] = useState(false);
@@ -42,13 +53,16 @@ export default function MyTraining() {
         fetchSessionsDataFromGoogleFit
     } = useGoogleFit();
 
-    // Dialog state
+    // Calendar Dialog state
     const [visible, setVisible] = useState(false);
     const [selectedRange, setSelectedRange] = useState<{ start: string | undefined, end: string | undefined }>({
         start: undefined,
         end: undefined
     });
     const [error, setError] = useState<string | undefined>();
+
+    //Confirmation Dialog state
+    const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
     useEffect(() => {
         initializeUserData();
@@ -113,7 +127,7 @@ export default function MyTraining() {
         setVisible(true);
     };
 
-    const handleDialogSubmit = () => {
+    const handleCalendarDialogSubmit = () => {
         if (selectedRange.start && selectedRange.end) {
             setGoalStartDate(selectedRange.start);
             setGoalEndDate(selectedRange.end);
@@ -125,7 +139,20 @@ export default function MyTraining() {
         }
     };
 
-    const handleDialogCancel = () => {
+    const onSavePress = () => {
+        setShowConfirmationDialog(true);
+    };
+
+    const onConfirmationDialogConfirm = () => {
+        setShowConfirmationDialog(false);
+        handleSave();
+    };
+
+    const onConfirmationDialogCancel = () => {
+        setShowConfirmationDialog(false);
+    };
+
+    const handleCalendarDialogCancel = () => {
         setVisible(false);
         setError(undefined);
     };
@@ -148,18 +175,9 @@ export default function MyTraining() {
         setGender(value);
     };
 
-    const formatDate = (inputDate: string) => {
-        const date = new Date(inputDate);
-
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-
-        return `${day}/${month}/${year}`;
-    }
 
     return (
-        isLoading ? (<View><Text>Loading...</Text></View>) : (
+        isLoading ? (defaultLoader()) : (
             <ScrollView>
                 <PaperProvider>
                     <View style={styles.container}>
@@ -209,7 +227,7 @@ export default function MyTraining() {
                             {editMode ? (
                                 <DropdownMenu items={GENDER_OPTIONS}
                                               onItemChange={handleGenderChange}
-                                              defaultValue={Gender.male}
+                                              defaultValue={gender}
                                               dropdownLabel={"Gender:"}/>
                             ) : (
                                 <View>
@@ -224,7 +242,7 @@ export default function MyTraining() {
                             {editMode ? (
                                 <DropdownMenu items={LEVEL_OPTIONS}
                                               onItemChange={handleLevelChange}
-                                              defaultValue={"Beginner"}
+                                              defaultValue={level}
                                               dropdownLabel={"Level:   "}/>
                             ) : (
                                 <View>
@@ -239,7 +257,7 @@ export default function MyTraining() {
                             {editMode ? (
                                 <DropdownMenu items={GOAL_OPTIONS}
                                               onItemChange={handleGoalChange}
-                                              defaultValue={"Increase Distance"}
+                                              defaultValue={goal}
                                               dropdownLabel={"Goal:    "}/>
                             ) : (
                                 <View>
@@ -275,7 +293,7 @@ export default function MyTraining() {
                         <Portal>
                             <Dialog
                                 visible={visible}
-                                onDismiss={handleDialogCancel}
+                                onDismiss={handleCalendarDialogCancel}
                                 style={styles.dialog}
                             >
                                 <Dialog.Title style={styles.dialogTitle}>Select Dates Range</Dialog.Title>
@@ -287,25 +305,61 @@ export default function MyTraining() {
                                     {error && <Text style={styles.errorText}>{error}</Text>}
                                 </Dialog.Content>
                                 <Dialog.Actions>
-                                    <Button onPress={handleDialogCancel} style={styles.dialogButtons}
+                                    <Button onPress={handleCalendarDialogCancel}
+                                            style={[styles.dialogButtons, styles.cancelButton]}
                                             textColor={'white'}>Cancel</Button>
-                                    <Button onPress={handleDialogSubmit} style={styles.dialogButtons}
+                                    <Button onPress={handleCalendarDialogSubmit}
+                                            style={[styles.dialogButtons, styles.saveButton]}
                                             textColor={'white'}>Submit</Button>
+                                </Dialog.Actions>
+                            </Dialog>
+                        </Portal>
+
+                        {/* Confirmation Dialog */}
+                        <Portal>
+                            <Dialog visible={showConfirmationDialog} onDismiss={onConfirmationDialogCancel}
+                                    style={styles.confirmationDialog}>
+                                <Dialog.Title style={styles.confirmationDialogTitleText}>Warning!</Dialog.Title>
+                                <Dialog.Content style={styles.confirmationDialogContent}>
+                                    <IconButton icon="alert-circle" size={24} iconColor={"#2f93ab"}/>
+                                    <Paragraph style={styles.confirmationDialogParagraph}>
+                                        Are you sure you want to save changes? This will override all past plan data.
+                                    </Paragraph>
+                                </Dialog.Content>
+                                <Dialog.Actions>
+                                    <Button onPress={onConfirmationDialogCancel} style={styles.cancelButton}
+                                            textColor={'white'}>
+                                        {' Cancel '}
+                                    </Button>
+                                    <Button onPress={onConfirmationDialogConfirm} style={styles.saveButton}
+                                            textColor={'white'}>
+                                        Continue
+                                    </Button>
                                 </Dialog.Actions>
                             </Dialog>
                         </Portal>
 
                         <View style={styles.buttonContainer}>
                             {editMode ? (
-                                <Button mode="contained" onPress={handleSave} style={styles.modeButton}
-                                        textColor={'white'}
-                                        labelStyle={styles.modeButtonText} contentStyle={styles.modeButtonContent}>
-                                    Save
-                                </Button>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                                    <Button mode="contained" onPress={toggleEditMode}
+                                            style={[styles.modeButton, styles.cancelButton]}
+                                            textColor={'white'}
+                                            labelStyle={styles.modeButtonText} contentStyle={styles.modeButtonContent}>
+                                        Cancel
+                                    </Button>
+                                    <Button mode="contained" onPress={onSavePress}
+                                            style={[styles.modeButton, styles.saveButton]}
+                                            textColor={'white'}
+                                            labelStyle={styles.modeButtonText} contentStyle={styles.modeButtonContent}>
+                                        Save
+                                    </Button>
+                                </View>
                             ) : (
-                                <Button mode="contained" onPress={toggleEditMode} style={styles.modeButton}
+                                <Button mode="contained" onPress={toggleEditMode}
+                                        style={[styles.modeButton, styles.saveButton]}
                                         textColor={'white'} labelStyle={styles.modeButtonText}
-                                        contentStyle={styles.modeButtonContent}>
+                                        contentStyle={styles.modeEditButtonContent}>
                                     Edit
                                 </Button>
                             )}
@@ -389,12 +443,13 @@ const styles = StyleSheet.create({
         backgroundColor: Theme.colors.white
     },
     dialogButtons: {
-        backgroundColor: Theme.colors.themeColor,
         width: 100
 
     },
     dialogTitle: {
         color: Theme.colors.themeColor,
+        flexDirection: "row",
+        alignSelf: "center"
     },
     errorText: {
         color: 'red',
@@ -406,9 +461,18 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 20,
         alignSelf: 'center',
-        backgroundColor: Theme.colors.themeColor,
+    },
+    cancelButton: {
+        backgroundColor: "#959e9f"
+    },
+    saveButton: {
+        backgroundColor: Theme.colors.themeColor
     },
     modeButtonContent: {
+        height: 55,
+        width: 145,
+    },
+    modeEditButtonContent: {
         height: 55,
         width: 320,
     },
@@ -431,6 +495,30 @@ const styles = StyleSheet.create({
     editIcon: {
         justifyContent: "flex-end",
         marginBottom: 15
+
+    },
+
+    confirmationDialog: {
+        width: '100%',
+        paddingHorizontal: 15,
+        alignSelf: "center",
+        alignItems: "center",
+        backgroundColor: Theme.colors.white
+    },
+    confirmationDialogTitleText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: "#2f93ab",
+        alignSelf: 'center'
+    },
+    confirmationDialogParagraph: {
+        color: '#444',
+        fontSize: 14,
+        flexWrap: 'wrap',
+        fontWeight: 'bold',
+    },
+    confirmationDialogContent: {
+        flexDirection: 'row',
 
     },
 });

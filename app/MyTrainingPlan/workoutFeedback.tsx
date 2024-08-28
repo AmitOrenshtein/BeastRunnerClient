@@ -6,6 +6,7 @@ import moment from "moment";
 import { Divider, Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { SegmentedButtons, TextInput } from 'react-native-paper';
+import {formatDate} from "@/app/(tabs)/PersonalInfo";
 
 export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}:
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
@@ -38,7 +39,7 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
             }
         }>
         <View style={styles.modalView}>
-            <Text style={styles.modalText}>{workout.date.toString()}</Text>
+            <Text style={styles.modalText}>{formatDate(workout.date.toString())}</Text>
             <TextInput
                 keyboardType="numeric"
                 style={{maxHeight: height / 10, width: width / 2}}
@@ -150,5 +151,4 @@ const styles = StyleSheet.create({
         flexDirection:"row",
       },
   });
-  
   

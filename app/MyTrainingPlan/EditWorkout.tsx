@@ -6,6 +6,7 @@ import moment from "moment";
 import { Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { TextInput } from 'react-native-paper';
+import {formatDate} from "@/app/(tabs)/PersonalInfo";
 
 export default function EditWorkout({plan, setPlan, workout, modalVisible, setModalVisible}: 
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
@@ -38,7 +39,7 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
             }
         }>
         <View style={styles.modalView}>
-            <Text style={styles.modalText}>{workout.date.toString()}</Text>
+            <Text style={styles.modalText}>{formatDate(workout.date.toString())}</Text>
             <TextInput
                 style={{maxHeight: height / 10, width: width / 2}}
                 outlineStyle={{borderColor:"#34bdeb"}}
@@ -127,5 +128,4 @@ const styles = StyleSheet.create({
       color:"gray"
     },
   });
-  
   
