@@ -44,7 +44,9 @@ const GenericMenu = (props: GenericMenuProps) => {
                 }
             >
                 {props.menuItems.map(value =>
-                    <Menu.Item onPress={() => {
+                    <Menu.Item 
+                        key={value.title}
+                        onPress={() => {
                         (!value.keepMenuOpen && closeMenu());
                         value.onItemPress();
                     }} title={value.title}/>

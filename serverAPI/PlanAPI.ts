@@ -34,4 +34,10 @@ export const PlanAPI = {
   rePlanWorkoutPlan: async function (rePlanValue: IsRePlanNeededValues):Promise<AxiosResponse<PlanResponse>> {
     return api.post('/rePlan', {rePlanValue: rePlanValue});
   },
+
+  setUserData:  async function setUserData(userPreferences: UserPreferences):Promise<AxiosResponse<boolean>> {
+    return api.post('/setUserData', {
+      userPreferences
+    })
+  }
 };
