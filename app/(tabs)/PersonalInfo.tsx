@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ScrollView, StyleSheet, Text, TextInput, View} from "react-native";
 import {Button, Card, Dialog, Portal, Provider as PaperProvider} from "react-native-paper";
 import Theme from "@/appTheme";
@@ -8,7 +8,9 @@ import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {genderOptions} from "@/app/CreateNewPlan/UserData";
 import {levelOptions} from "@/app/CreateNewPlan/UserLevel";
 import {goalOptions} from "@/app/CreateNewPlan/UserGoal";
-import {Gender} from "@/app/types/user";
+import {Gender, UserFitnessData, UserPreferences} from "@/app/types/user";
+import {PlanAPI} from "@/serverAPI/PlanAPI";
+import {HeightData, useGoogleFit, WeightData} from "@/app/context/GoogleFitContext";
 
 
 const GENDER_OPTIONS = genderOptions;
@@ -25,6 +27,20 @@ export default function MyTraining() {
     const [goal, setGoal] = useState("Increase Distance");
     const [goalStartDate, setGoalStartDate] = useState("");
     const [goalEndDate, setGoalEndDate] = useState("");
+    const [height, setHeight] = useState<number | undefined>(undefined);
+    const [weight, setWeight] = useState<number | undefined>(undefined);
+    const [userFitnessData, setUserFitnessData] = useState<UserFitnessData>({
+        height: 0,
+        weight: 0,
+    })
+    const [isLoading, setIsLoading] = useState(false);
+
+    //google-fit context
+    const {
+        getCurrentHeight,
+        getCurrentWeight,
+        fetchSessionsDataFromGoogleFit
+    } = useGoogleFit();
 
     // Dialog state
     const [visible, setVisible] = useState(false);
@@ -34,12 +50,63 @@ export default function MyTraining() {
     });
     const [error, setError] = useState<string | undefined>();
 
+    useEffect(() => {
+        initializeUserData();
+    }, []);
+
+    const initializeUserData = async () => {
+        setIsLoading(true);
+        try {
+            const userData = await PlanAPI.getUserData();
+            userData.age && setAge(userData.age);
+            userData.gender && setGender(userData.gender);
+            userData.userRunningLevel && setLevel(userData.userRunningLevel);
+            userData.userRunningGoal && setGoal(userData.userRunningGoal);
+            userData.startDate && setGoalStartDate(userData.startDate);
+            userData.endDate && setGoalEndDate(userData.endDate);
+            userData.startDate && userData.endDate && setSelectedRange({start: userData.startDate, end: userData.endDate});
+            const endTime = Date.now();
+            const lastNinetyDays = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
+            const currentWeight = await getCurrentWeight(lastNinetyDays, endTime) as WeightData;
+            setWeight(currentWeight.weight);
+            const currentHeight = await getCurrentHeight(lastNinetyDays, endTime) as HeightData;
+            setHeight(currentHeight.height);
+            setUserFitnessData({height: currentHeight.height, weight: currentWeight.weight});
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     const toggleEditMode = () => {
         setEditMode(!editMode);
     };
 
-    const handleSave = () => {
-        toggleEditMode();
+    const handleSave = async () => {
+        try {
+            setIsLoading(true);
+            const userDataToSave: UserPreferences = {
+                gender,
+                age,
+                userRunningLevel: level,
+                userRunningGoal: goal,
+                startDate: goalStartDate,
+                endDate: goalEndDate
+            }
+            const successToSaveUserData = await PlanAPI.setUserData(userDataToSave);
+            if (successToSaveUserData.data) {
+                const plan = await PlanAPI.generatePlan({userFitnessData: userFitnessData, userPreferences: userDataToSave});
+                console.log(plan);
+                toggleEditMode();
+            } else {
+                console.log("Failed to save user preferences data for some reason...");//todo: how to handle failer?
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const showDateRangePickerDialog = () => {
@@ -81,145 +148,172 @@ export default function MyTraining() {
         setGender(value);
     };
 
+    const formatDate = (inputDate: string) => {
+        const date = new Date(inputDate);
+
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
     return (
-        <ScrollView>
-            <PaperProvider>
-                <View style={styles.container}>
-                    <View style={{marginVertical: 10}}>
-                        <Text style={[styles.homeText, {fontWeight: "bold", fontSize: 25}]}>
-                            Personal Info
-                        </Text>
-                    </View>
-
-                    <View style={styles.fieldContainer}>
-                        {editMode ? (
-                            <View style={styles.editableInputContainer}>
-                                <Text style={styles.label}>Age: </Text>
-                                <MaterialCommunityIcons name="pencil" size={20} color="#888" style={styles.editIcon}/>
-                                <TextInput
-                                    style={styles.ageInput}
-                                    keyboardType="numeric"
-                                    value={age}
-                                    onChangeText={setAge}
-                                    placeholder="Enter Age"
-                                />
-
-                            </View>
-                        ) : (
-                            <View>
-                                <Text style={styles.label}>Age:</Text>
-                                <Text style={styles.value}>{age}</Text>
-                            </View>
-                        )}
-                    </View>
-
-                    <View style={styles.fieldContainer}>
-                        {editMode ? (
-                            <DropdownMenu items={GENDER_OPTIONS}
-                                          onItemChange={handleGenderChange}
-                                          defaultValue={Gender.male}
-                                          dropdownLabel={"Gender:"}/>
-                        ) : (
-                            <View>
-                                <Text style={styles.label}>Gender:</Text>
-                                <Text style={styles.value}>{gender}</Text>
-                            </View>
-                        )}
-                    </View>
-
-
-                    <View style={styles.fieldContainer}>
-                        {editMode ? (
-                            <DropdownMenu items={LEVEL_OPTIONS}
-                                          onItemChange={handleLevelChange}
-                                          defaultValue={"Beginner"}
-                                          dropdownLabel={"Level:   "}/>
-                        ) : (
-                            <View>
-                                <Text style={styles.label}>Level:</Text>
-                                <Text style={styles.value}>{level}</Text>
-                            </View>
-
-                        )}
-                    </View>
-
-                    <View style={styles.fieldContainer}>
-                        {editMode ? (
-                            <DropdownMenu items={GOAL_OPTIONS}
-                                          onItemChange={handleGoalChange}
-                                          defaultValue={"Increase Distance"}
-                                          dropdownLabel={"Goal:    "}/>
-                        ) : (
-                            <View>
-                                <Text style={styles.label}>Goal:</Text>
-                                <Text style={styles.value}>{goal}</Text></View>
-                        )}
-                    </View>
-
-                    <Card style={{backgroundColor: 'white', paddingVertical: 10, marginVertical: 10}}>
-                        <Text style={styles.dateLabel}>Dates of your plan:</Text>
-                        <View>
-                            <Text
-                                style={editMode ? styles.cardInputEdit : styles.cardInputDisplay}>{`From: ${goalStartDate}`}</Text>
-                            <Text
-                                style={editMode ? styles.cardInputEdit : styles.cardInputDisplay}>{`To: ${goalEndDate}`}</Text>
+        isLoading ? (<View><Text>Loading...</Text></View>) : (
+            <ScrollView>
+                <PaperProvider>
+                    <View style={styles.container}>
+                        <View style={{marginVertical: 10}}>
+                            <Text style={[styles.homeText, {fontWeight: "bold", fontSize: 25}]}>
+                                Personal Info
+                            </Text>
                         </View>
 
-                        {editMode && (
-                            <Button
-                                mode="contained"
-                                onPress={showDateRangePickerDialog}
-                                style={styles.openDialogBtn}
-                                contentStyle={styles.buttonContent}
-                                textColor={'white'}
-                                labelStyle={{fontSize: 16}}>
-                                {"Reschedule "}
-                                <MaterialCommunityIcons name="calendar" size={18} color="white"/>
-                            </Button>
-                        )}
-                    </Card>
 
-                    {/* Dialog for Date Range Picker */}
-                    <Portal>
-                        <Dialog
-                            visible={visible}
-                            onDismiss={handleDialogCancel}
-                            style={styles.dialog}
-                        >
-                            <Dialog.Title style={styles.dialogTitle}>Select Dates Range</Dialog.Title>
-                            <Dialog.Content>
-                                <DateRangePicker
-                                    dispatchDates={(startDate, endDate) => {
-                                        setSelectedRange({start: startDate, end: endDate});
-                                    }}/>
-                                {error && <Text style={styles.errorText}>{error}</Text>}
-                            </Dialog.Content>
-                            <Dialog.Actions>
-                                <Button onPress={handleDialogCancel} style={styles.dialogButtons}
-                                        textColor={'white'}>Cancel</Button>
-                                <Button onPress={handleDialogSubmit} style={styles.dialogButtons}
-                                        textColor={'white'}>Submit</Button>
-                            </Dialog.Actions>
-                        </Dialog>
-                    </Portal>
+                        {!editMode && <View style={styles.fieldContainer}>
+                            <Text style={styles.label}>Height:</Text>
+                            <Text style={styles.value}>{height ? height.toFixed(2) + " meter" : "-"}</Text>
+                        </View>}
 
-                    <View style={styles.buttonContainer}>
-                        {editMode ? (
-                            <Button mode="contained" onPress={handleSave} style={styles.modeButton} textColor={'white'}
-                                    labelStyle={styles.modeButtonText} contentStyle={styles.modeButtonContent}>
-                                Save
-                            </Button>
-                        ) : (
-                            <Button mode="contained" onPress={toggleEditMode} style={styles.modeButton}
-                                    textColor={'white'} labelStyle={styles.modeButtonText}
-                                    contentStyle={styles.modeButtonContent}>
-                                Edit
-                            </Button>
-                        )}
+
+                        {!editMode && <View style={styles.fieldContainer}>
+                            <Text style={styles.label}>Weight:</Text>
+                            <Text style={styles.value}>{weight ? weight + " kg" : "-"}</Text>
+                        </View>}
+
+
+                        <View style={styles.fieldContainer}>
+                            {editMode ? (
+                                <View style={styles.editableInputContainer}>
+                                    <Text style={styles.label}>Age: </Text>
+                                    <MaterialCommunityIcons name="pencil" size={20} color="#888"
+                                                            style={styles.editIcon}/>
+                                    <TextInput
+                                        style={styles.ageInput}
+                                        keyboardType="numeric"
+                                        value={age}
+                                        onChangeText={setAge}
+                                        placeholder="Enter Age"
+                                    />
+
+                                </View>
+                            ) : (
+                                <View>
+                                    <Text style={styles.label}>Age:</Text>
+                                    <Text style={styles.value}>{age}</Text>
+                                </View>
+                            )}
+                        </View>
+
+                        <View style={styles.fieldContainer}>
+                            {editMode ? (
+                                <DropdownMenu items={GENDER_OPTIONS}
+                                              onItemChange={handleGenderChange}
+                                              defaultValue={Gender.male}
+                                              dropdownLabel={"Gender:"}/>
+                            ) : (
+                                <View>
+                                    <Text style={styles.label}>Gender:</Text>
+                                    <Text style={styles.value}>{gender}</Text>
+                                </View>
+                            )}
+                        </View>
+
+
+                        <View style={styles.fieldContainer}>
+                            {editMode ? (
+                                <DropdownMenu items={LEVEL_OPTIONS}
+                                              onItemChange={handleLevelChange}
+                                              defaultValue={"Beginner"}
+                                              dropdownLabel={"Level:   "}/>
+                            ) : (
+                                <View>
+                                    <Text style={styles.label}>Level:</Text>
+                                    <Text style={styles.value}>{level}</Text>
+                                </View>
+
+                            )}
+                        </View>
+
+                        <View style={styles.fieldContainer}>
+                            {editMode ? (
+                                <DropdownMenu items={GOAL_OPTIONS}
+                                              onItemChange={handleGoalChange}
+                                              defaultValue={"Increase Distance"}
+                                              dropdownLabel={"Goal:    "}/>
+                            ) : (
+                                <View>
+                                    <Text style={styles.label}>Goal:</Text>
+                                    <Text style={styles.value}>{goal}</Text></View>
+                            )}
+                        </View>
+
+                        <Card style={{backgroundColor: 'white', paddingVertical: 10, marginVertical: 10}}>
+                            <Text style={styles.dateLabel}>Dates of your plan:</Text>
+                            <View>
+                                <Text
+                                    style={editMode ? styles.cardInputEdit : styles.cardInputDisplay}>{`From: ${formatDate(goalStartDate)}`}</Text>
+                                <Text
+                                    style={editMode ? styles.cardInputEdit : styles.cardInputDisplay}>{`To: ${formatDate(goalEndDate)}`}</Text>
+                            </View>
+
+                            {editMode && (
+                                <Button
+                                    mode="contained"
+                                    onPress={showDateRangePickerDialog}
+                                    style={styles.openDialogBtn}
+                                    contentStyle={styles.buttonContent}
+                                    textColor={'white'}
+                                    labelStyle={{fontSize: 16}}>
+                                    {"Reschedule "}
+                                    <MaterialCommunityIcons name="calendar" size={18} color="white"/>
+                                </Button>
+                            )}
+                        </Card>
+
+                        {/* Dialog for Date Range Picker */}
+                        <Portal>
+                            <Dialog
+                                visible={visible}
+                                onDismiss={handleDialogCancel}
+                                style={styles.dialog}
+                            >
+                                <Dialog.Title style={styles.dialogTitle}>Select Dates Range</Dialog.Title>
+                                <Dialog.Content>
+                                    <DateRangePicker
+                                        dispatchDates={(startDate, endDate) => {
+                                            setSelectedRange({start: startDate, end: endDate});
+                                        }}/>
+                                    {error && <Text style={styles.errorText}>{error}</Text>}
+                                </Dialog.Content>
+                                <Dialog.Actions>
+                                    <Button onPress={handleDialogCancel} style={styles.dialogButtons}
+                                            textColor={'white'}>Cancel</Button>
+                                    <Button onPress={handleDialogSubmit} style={styles.dialogButtons}
+                                            textColor={'white'}>Submit</Button>
+                                </Dialog.Actions>
+                            </Dialog>
+                        </Portal>
+
+                        <View style={styles.buttonContainer}>
+                            {editMode ? (
+                                <Button mode="contained" onPress={handleSave} style={styles.modeButton}
+                                        textColor={'white'}
+                                        labelStyle={styles.modeButtonText} contentStyle={styles.modeButtonContent}>
+                                    Save
+                                </Button>
+                            ) : (
+                                <Button mode="contained" onPress={toggleEditMode} style={styles.modeButton}
+                                        textColor={'white'} labelStyle={styles.modeButtonText}
+                                        contentStyle={styles.modeButtonContent}>
+                                    Edit
+                                </Button>
+                            )}
+                        </View>
                     </View>
-                </View>
-            </PaperProvider>
-        </ScrollView>
+                </PaperProvider>
+            </ScrollView>
+        )
     );
 }
 
@@ -280,10 +374,10 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         paddingHorizontal: 4,
         paddingVertical: 2,
-        flexDirection: 'row-reverse',
+        flexDirection: 'row',
     },
     buttonContent: {
-        flexDirection: 'row-reverse',
+        flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
@@ -322,7 +416,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     editableInputContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: 'row',
         alignItems: 'center',
     },
     ageInput: {

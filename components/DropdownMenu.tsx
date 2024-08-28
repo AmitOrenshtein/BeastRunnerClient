@@ -57,7 +57,7 @@ export default DropdownMenu;
 const styles = StyleSheet.create({
     container: {
         marginBottom:20,
-        flexDirection:"row-reverse",
+        flexDirection:"row",
         // alignItems:"baseline" // do a problem in personalInfo screen when press edit button
     },
     label: {

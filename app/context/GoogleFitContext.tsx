@@ -28,12 +28,12 @@ const activityTypes: { [key: number]: string } = {
 
 };
 
-interface WeightData {
+export interface WeightData {
     date: string;
     weight: number;
 }
 
-interface HeightData {
+export interface HeightData {
     date: string;
     height: number;
 }

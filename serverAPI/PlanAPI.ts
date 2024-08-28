@@ -35,5 +35,15 @@ export const PlanAPI = {
     return api.post('/setUserData', {
       userPreferences
     })
+  },
+
+  getUserData: async function getUserData(): Promise<UserPreferences> {
+    return new Promise<UserPreferences>((resolve, reject) => {
+      api.get('/getUserData').then(response => {
+        resolve(response.data);
+      }).catch(error => {
+        reject(new Error("Failed to get user data: ", error));
+      })
+    })
   }
 };
