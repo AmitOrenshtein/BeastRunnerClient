@@ -31,8 +31,8 @@ export const PlanAPI = {
     });
   },
 
-  rePlanWorkoutPlan: async function (rePlanValue: IsRePlanNeededValues):Promise<AxiosResponse<PlanResponse>> {
-    return api.post('/rePlan', {rePlanValue: rePlanValue});
+  rePlanWorkoutPlan: async function (rePlanValue: IsRePlanNeededValues, userFitnessData: UserFitnessData):Promise<AxiosResponse<PlanResponse>> {
+    return api.post('/rePlan', {rePlanValue: rePlanValue, userFitnessData: userFitnessData});
   },
 
   setUserData:  async function setUserData(userPreferences: UserPreferences):Promise<AxiosResponse<boolean>> {

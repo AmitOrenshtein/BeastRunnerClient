@@ -2,16 +2,52 @@ import { Text, View, StyleSheet, Pressable, Modal, Dimensions } from "react-nati
 import { IsRePlanNeededValues, WeeklyPlan } from "../types/training";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 const { width, height } = Dimensions.get("window");
+import React, { useState, useEffect } from "react";
+import { ActivityIndicator } from "react-native-paper";
+import appTheme from '../../appTheme';
+import {formatMillisToDateTime, SessionData, useGoogleFit} from "@/app/context/GoogleFitContext";
 
 export default function RePlanWorkouts({isRePlanNeeded, setIsRePlanNeeded, setPlan}: {
     isRePlanNeeded: IsRePlanNeededValues, 
     setIsRePlanNeeded: React.Dispatch<React.SetStateAction<IsRePlanNeededValues>>,
     setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>}) {
+    
+    const [isLoading, setIsLoadong] = useState(false);
+    
+    const {
+        googleAccessTokenState,
+        getCurrentHeight,
+        getCurrentWeight
+    } = useGoogleFit();
+
+    const [fitnessHeight, setFitnessHeight] = useState<number>(0);
+    const [fitnessWeight, setFitnessWeight] = useState<number>(0);
+
+    useEffect(() => {
+        const fetchGoogleFitData = async () => {
+            const endTime = Date.now();
+            const lastNinetyDays = Date.now() - 90 * 24 * 60 * 60 * 1000; // Last 90 days
+            // Fetch data from Google Fit API
+            const [
+                currentHeight,
+                currentWeight
+            ] = await Promise.all([
+                getCurrentHeight(lastNinetyDays, endTime),
+                getCurrentWeight(lastNinetyDays, endTime)
+            ]);
+            // Set fetched data
+            setFitnessHeight(currentHeight.height);
+            setFitnessWeight(currentWeight.weight);
+        };
+
+        fetchGoogleFitData();
+    }, []);
 
     const rePlan = () => {
-        PlanAPI.rePlanWorkoutPlan(isRePlanNeeded).then((res) => {
-            console.log(res);
+        setIsLoadong(true);
+        PlanAPI.rePlanWorkoutPlan(isRePlanNeeded, {weight: fitnessWeight, height: fitnessHeight}).then((res) => {
             setPlan(res.data.plan);
+            setIsLoadong(false);
             setIsRePlanNeeded(IsRePlanNeededValues.NoNeedForRePlan);
         });
     }
@@ -32,16 +68,22 @@ export default function RePlanWorkouts({isRePlanNeeded, setIsRePlanNeeded, setPl
                     Would you like us to readujst your training plan?
                 </Text>
                 <View style={{flexDirection:"row", alignSelf:"center"}}>
-                    <Pressable
-                    style={[styles.button, {backgroundColor: "#78CFE4"}]}
-                    onPress={() => rePlan()}>
-                        <Text>Yes</Text>
-                    </Pressable>
-                    <Pressable
-                    style={[styles.button, {backgroundColor: "red"}]}
-                    onPress={() => setIsRePlanNeeded(IsRePlanNeededValues.NoNeedForRePlan)}>
-                        <Text>No</Text>
-                    </Pressable>
+                    {isLoading ? 
+                        <ActivityIndicator size="large" color={appTheme.colors.themeColor} style={{marginTop: 30}} /> 
+                        : 
+                        <>
+                            <Pressable
+                                style={[styles.button, {backgroundColor: "#78CFE4"}]}
+                                onPress={() => rePlan()}>
+                                <Text>Yes</Text>
+                            </Pressable>
+                            <Pressable
+                                style={[styles.button, {backgroundColor: "red"}]}
+                                onPress={() => setIsRePlanNeeded(IsRePlanNeededValues.NoNeedForRePlan)}>
+                                <Text>No</Text>
+                            </Pressable>
+                        </>
+                    }
                 </View>
             </View>
         </Modal>
