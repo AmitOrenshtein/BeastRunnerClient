@@ -6,7 +6,7 @@ import { WeeklyPlan, Workout } from "../types/training";
 import EditWorkout from "./EditWorkout";
 const { width, height } = Dimensions.get("window");
 import { Icon } from "react-native-elements";
-import { Card, Button } from "react-native-paper";
+import { Card, Button, ActivityIndicator } from "react-native-paper";
 import WorkoutFeedback from "./workoutFeedback";
 import { useFocusEffect } from "@react-navigation/native";
 import { useGoogleFit } from "../context/GoogleFitContext";
@@ -28,9 +28,11 @@ export const BasicTimeline = () => {
     },
   });
   const [plan, setPlan] = useState<WeeklyPlan[]>([]);
+  const [isLoading, setIsLoadong] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
+      setIsLoadong(true);
       PlanAPI.getPlan().then((res) => {
         const newPlan = [...res.data.plan];
         const startTime = Date.now() - 60 * 24 * 60 * 60 * 1000; // Last 90 days
@@ -44,7 +46,11 @@ export const BasicTimeline = () => {
           })}
         )))
           setPlan(newPlan)
-        }).catch(() => setPlan(newPlan))
+          setIsLoadong(false);
+        }).catch(() => {
+          setPlan(newPlan);
+          setIsLoadong(false);
+        })
       });
     }, [])
   );
@@ -140,7 +146,10 @@ export const BasicTimeline = () => {
     );
   };
 
-  if (plan.length === 0) {
+  if (isLoading && plan.length === 0) {
+    return <ActivityIndicator size="large" color={appTheme.colors.themeColor} style={{marginTop: 30}} />
+  }
+  else if (plan.length === 0) {
     return <Text>No Plan Created Yet..</Text>;
   }
 
