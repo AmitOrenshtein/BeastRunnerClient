@@ -1,9 +1,10 @@
 import { Text, View, StyleSheet } from "react-native";
+import MyStats from '../MyStats';
 
 export default function ProgressAndStats() {
     return (
         <View style={styles.container}>
-            <Text>Progress and stats page!</Text>
+            <MyStats />
         </View>
     );
 };

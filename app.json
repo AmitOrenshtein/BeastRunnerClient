@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "BeastRunnerClient",
-    "slug": "BeastRunnerClient",
+    "name": "Beast Runner",
+    "slug": "Beast Runner",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "myapp",
@@ -9,6 +9,7 @@
     "ios": {
       "supportsTablet": true
     },
+    "icon": "./assets/runnerLogo.png",
     "android": {
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",

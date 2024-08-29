@@ -9,7 +9,7 @@ interface UserLevelProps {
 
 interface Option {
   label: string;
-  value: string;
+  value: string; 
 }
 
 const options: Option[] = [
@@ -36,14 +36,16 @@ const UserLevel: FC<UserLevelProps> = ({ userLevel, dispatchUserLevel }) => {
 
   return (
     <View>
-      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20 }}>
+      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20, alignSelf: "center", margin: 40 }}>
         Choose your running level:{" "}
       </Text>
-      <RadioButton
-        options={options}
-        selectedOption={selectedOption}
-        onSelect={handleSelect}
-      />
+      <View style={{marginHorizontal: 40}}>
+        <RadioButton
+          options={options}
+          selectedOption={selectedOption}
+          onSelect={handleSelect}
+        />
+      </View>
     </View>
   );
 };

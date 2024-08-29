@@ -1,4 +1,5 @@
-import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
+import { Text, View, StyleSheet, Pressable, Modal, Dimensions } from "react-native";
+const { width, height } = Dimensions.get("window");
 import {IsRePlanNeededValues, WeeklyPlan, Workout } from "../types/training";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
@@ -20,16 +21,17 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
     const onSaveHandler = () => {
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
-                workout.date === day.date ? editedWorkout : day) }));
-        PlanAPI.updatePlan(updatedPlan).then((res) => {
-            console.log(res);
-            console.log("isRePlan: " + res.data.rePlanNeeded);
-            setPlan(res.data.updatedPlan.plan);
-            if(res.data.rePlanNeeded != IsRePlanNeededValues.NoNeedForRePlan) {
-                replanHanler(res.data.rePlanNeeded);
-            }
-            setModalVisible(!modalVisible);
-        });
+                moment(workout.date, "YYYY-MM-DD").utc(true).toString() === moment(day.date, "YYYY-MM-DD").utc(true).toString() ? 
+            editedWorkout : day) }));
+            PlanAPI.updatePlan(updatedPlan).then((res) => {
+                console.log(res);
+                console.log("isRePlan: " + res.data.rePlanNeeded);
+                setPlan(res.data.updatedPlan.plan);
+                if(res.data.rePlanNeeded != IsRePlanNeededValues.NoNeedForRePlan) {
+                    replanHanler(res.data.rePlanNeeded);
+                }
+                setModalVisible(!modalVisible);
+        })
     }
 
     return (
@@ -41,84 +43,84 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
                 setModalVisible(!modalVisible);
             }
         }>
-            <View style={styles.modalView}>
-                <Text style={styles.modalText}>{workout.date.toString()}</Text>
-                <Text style={styles.modalText}>{workout.workout}</Text>
-                <TextInput
-                    keyboardType="numeric"
-                    style={styles.textInput}
-                    outlineStyle={{borderColor:"#34bdeb"}}
-                    label={"Total time (minutes)"}
-                    mode="outlined"
-                    editable
-                    onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
-                    value={(editedWorkout.completedTime || 0).toString()}
-                />
-                <TextInput
-                    keyboardType="numeric"
-                    style={styles.textInput}
-                    outlineStyle={{borderColor:"#34bdeb"}}
-                    label={"Completed distance (km)"}
-                    mode="outlined"
-                    editable
-                    onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
-                    value={(editedWorkout.completedDistance || 0).toString()}
-                />
-                <Text style={styles.modalText}>How difficult was the workout?</Text>
-                <SegmentedButtons
-                    style={{marginVertical:10}}
-                    density="medium"
-                    value={editedWorkout.difficultyFeedback?.toString() || "3"}
-                    onValueChange={(text) => setEditedWorkout({...editedWorkout, difficultyFeedback:Number.parseInt(text)})}
-                    buttons={[
-                    {
-                        value: '1',
-                        label: '1',
-                        style:{minWidth:15}
-                    },
-                    {
-                        value: '2',
-                        label: '2',
-                        style:{minWidth:15}
-                    },
-                    {
-                        value: '3',
-                        label: '3',
-                        style:{minWidth:15}
-                    },
-                    {
-                        value: '4',
-                        label: '4',
-                        style:{minWidth:15}
-                    },
-                    {
-                        value: '5',
-                        label: '5',
-                        style:{minWidth:15}
-                    },
-                    ]}
-                />
-                <View style={{flexDirection:"row", alignSelf:"center"}}>
-                    <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => setModalVisible(!modalVisible)}>
-                        <Icon color="white" name='close' />
-                    </Pressable>
-                    <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => onSaveHandler()}>
-                        <Icon color="white" name='save' />
-                    </Pressable>
-                </View>
+        <View style={styles.modalView}>
+            <Text style={styles.modalText}>{workout.date.toString()}</Text>
+            <TextInput
+                keyboardType="numeric"
+                style={{maxHeight: height / 10, width: width / 2}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                label={"Total time"}
+                mode="outlined"
+                editable
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, completedTime:Number.parseFloat(text)})}
+                defaultValue={workout.completedTime?.toString()}
+            />
+            <TextInput
+                keyboardType="numeric"
+                style={{maxHeight: height / 10, width: width / 2}}
+                outlineStyle={{borderColor:"#34bdeb"}}
+                label={"Completed distance"}
+                mode="outlined"
+                editable
+                onChangeText={(text) => setEditedWorkout({...editedWorkout, completedDistance:Number.parseFloat(text)})}
+                defaultValue={workout.completedDistance?.toString()}
+            />
+            <Text style={styles.modalText}>How difficult was the workout?</Text>
+            <SegmentedButtons
+                style={{marginVertical:10}}
+                density="medium"
+                value={editedWorkout.difficultyFeedback?.toString() || "0"}
+                onValueChange={(text) => setEditedWorkout({...editedWorkout, difficultyFeedback:Number.parseInt(text)})}
+                buttons={[
+                {
+                    value: '1',
+                    label: '1',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '2',
+                    label: '2',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '3',
+                    label: '3',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '4',
+                    label: '4',
+                    style:{minWidth:15}
+                },
+                {
+                    value: '5',
+                    label: '5',
+                    style:{minWidth:15}
+                },
+                ]}
+      />
+          <View style={{flexDirection:"row"}}>
+            <Pressable
+            style={[styles.button, styles.buttonClose]}
+            onPress={() => setModalVisible(!modalVisible)}>
+                <Icon color="white" name='close' />
+            </Pressable>
+            <Pressable
+            style={[styles.button, styles.buttonClose]}
+            onPress={() => onSaveHandler()}>
+                <Icon color="white" name='save' />
+            </Pressable>
             </View>
+        </View>
         </Modal>
     );
 };
 
 const styles = StyleSheet.create({
     modalView: {
-        marginHorizontal:'5%',
-        marginVertical: 50,
+        marginHorizontal:'10%',
+        marginVertical: height / 5,
+        minHeight: height / 2.5,
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,

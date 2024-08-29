@@ -55,7 +55,7 @@ export default function GoogleLogin() {
     return (
         <View style={styles.container}>
             <Image
-                source={require('@/assets/runnerLogo.jpg')}
+                source={require('@/assets/runnerLogo.png')}
                 style={styles.logo}
             />
             <Text style={styles.title}>Run your way to your goals!</Text>

@@ -1,23 +1,66 @@
-import React, {createContext, useCallback, useContext, useEffect, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 import GoogleFit, {Scopes} from 'react-native-google-fit';
 import {getGoogleAccessTokenFromAsyncStorage} from "@/app/utils/AsyncStorageUtil";
 import googleApi from "@/app/utils/googleAxiosConfig";
+
+
+// Define types for session data
+export interface SessionData {
+    activityType: string;
+    duration: number; // In minutes
+    startTime: number; //In milliseconds
+    endTime: number; //In milliseconds
+    distance: number; // In meters
+    heartPoints: number;
+    calories: number;
+    stepsCount: number;
+    speed: string;
+}
+
+// Map of Google Fit activity types
+const activityTypes: { [key: number]: string } = {
+    8: "Running",
+    57: "Running on sand",
+    58: "Running (treadmill)",
+    7: "Walking",
+    93: "Walking (fitness)",
+    95: "Walking (treadmill)",
+
+};
+
+interface WeightData {
+    date: string;
+    weight: number;
+}
+
+interface HeightData {
+    date: string;
+    height: number;
+}
+
+
+export const formatMillisToDateTime = (millisSeconds: string): string => {
+    const date = new Date(parseInt(millisSeconds));
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}/${month}/${year} (${hours}:${minutes})`;
+};
 
 interface GoogleFitContextProps {
     googleAccessTokenState: string | null;
     setGoogleAccessToken: (token: string | null) => void;
     configureGoogleFit: () => Promise<boolean>;
-    getAllRunningSessions: (startTime: number, endTime: number) => Promise<any>;
-    getAllWalkingSessions: (startTime: number, endTime: number) => Promise<any>;
-    getRunningSummary: (startTime: number, endTime: number) => Promise<any>;
-    getCaloriesBurnedSummary: (startTime: number, endTime: number) => Promise<any>;
-    getHeartPointSummary: (startTime: number, endTime: number) => Promise<any>;
-    getMoveMinutesSummary: (startTime: number, endTime: number) => Promise<any>;
-    getStepsCountSummary: (startTime: number, endTime: number) => Promise<any>;
     getHeightSummary: (startTime: number, endTime: number) => Promise<any>;
+    getCurrentHeight: (startTime: number, endTime: number) => Promise<any>;
     getWeightSummary: (startTime: number, endTime: number) => Promise<any>;
-    getDurationSummary: (startTime: number, endTime: number) => Promise<any>;
-    getSpeedSummary: (startTime: number, endTime: number) => Promise<any>;
+    getCurrentWeight:(startTime: number, endTime: number) => Promise<any>;
+    fetchSessionsDataFromGoogleFit: (startTime: number, endTime: number) => Promise<SessionData[]>;
 }
 
 const GoogleFitContext = createContext<GoogleFitContextProps | undefined>({
@@ -25,17 +68,11 @@ const GoogleFitContext = createContext<GoogleFitContextProps | undefined>({
     setGoogleAccessToken: () => {
     },
     configureGoogleFit: async () => false,
-    getAllRunningSessions: async () => [],
-    getAllWalkingSessions: async () => [],
-    getRunningSummary: async () => [],
-    getCaloriesBurnedSummary: async () => [],
-    getHeartPointSummary: async () => [],
-    getMoveMinutesSummary: async () => [],
-    getStepsCountSummary: async () => [],
     getHeightSummary: async () => [],
+    getCurrentHeight: async () => [],
     getWeightSummary: async () => [],
-    getDurationSummary: async () => [],
-    getSpeedSummary: async () => [],
+    getCurrentWeight: async () => [],
+    fetchSessionsDataFromGoogleFit: async () => []
 });
 
 const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
@@ -59,30 +96,122 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
         loadGoogleAccessToken();
     }, []);
 
-    const fetchData = useCallback(async (dataType: string, dataSourceId: string, startTime: number, endTime: number) => {
+    async function fetchData(dataType: string, dataSourceId: string, startTime: number, endTime: number) {
         console.log("about to fetch " + dataType + " from google fit.");
-        try {
-            const response = await googleApi.post(
+        return new Promise((resolve, reject) => {
+            googleApi.post(
                 `https://fitness.googleapis.com/fitness/v1/users/me/dataset:aggregate`,
                 {
                     aggregateBy: [
                         {
                             dataTypeName: dataType,
-                            dataSourceId: dataSourceId,
                         }
                     ],
-                    bucketByTime: {durationMillis: endTime - startTime},
+                    bucketByTime: {durationMillis: 86400000},//bucket by day
                     startTimeMillis: startTime,
                     endTimeMillis: endTime,
                 },
-            );
-            console.log("finished to fetch " + dataType + " for google fit: ", response.data);
-            return response.data;
-        } catch (error) {
-            console.error(`Error fetching data for ${dataType}:`, error);
-            throw error;
-        }
-    }, [googleAccessTokenState]);
+            ).then((response) => {
+                console.log("finished to fetch " + dataType + " for google fit: ", response.data);
+                resolve(response.data);
+            }).catch(error => {
+                console.error(`Error fetching data for ${dataType}:`, error);
+                reject(error);
+            })
+        })
+    }
+
+    async function fetchSessionsDataFromGoogleFit(startTimeMillis: number, endTimeMillis: number): Promise<SessionData[]> {
+        console.log("about to fetch google fit sessions data from google fit.");
+        return new Promise<SessionData[]>((resolve, reject) => {
+            googleApi.post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
+                {
+                    aggregateBy: [
+                        {
+                            dataTypeName: "com.google.distance.delta"
+                        },
+                        {
+                            dataTypeName: "com.google.active_minutes"
+                        },
+                        {
+                            dataTypeName: "com.google.heart_minutes"
+                        },
+                        {
+                            dataTypeName: "com.google.calories.expended"
+                        },
+                        {
+                            dataTypeName: "com.google.step_count.delta"
+                        },
+                        {
+                            dataTypeName: "com.google.speed"
+                        }
+                    ],
+                    bucketBySession: {"minDurationMillis": 1},
+                    startTimeMillis: startTimeMillis.toString(),
+                    endTimeMillis: endTimeMillis.toString()
+                }).then((response) => {
+                console.log("aaaaa: ", response)
+                const sessionData: SessionData[] = mapResponseToSessionData(response.data);
+                resolve(sessionData);
+            }).catch(error => {
+                console.error('Error retrieving Google Fit sessions data:', error);
+                reject(error);
+            })
+        });
+    }
+
+    function mapResponseToSessionData(response: any): SessionData[] {
+        return response.bucket.map((bucket: any) => {
+            const session = bucket.session;
+            const activityType = activityTypes[session.activityType] || "Unknown";
+            const startTime = session.startTimeMillis;
+            const endTime = session.endTimeMillis;
+
+            let distance = 0;
+            let heartPoints = 0;
+            let calories = 0;
+            let stepsCount = 0;
+            let duration = 0;
+            let speed = '';
+
+            bucket.dataset.forEach((dataset: any) => {
+                dataset.point.forEach((point: any) => {
+                    switch (point.dataTypeName) {
+                        case "com.google.distance.delta":
+                            distance = point.value[0].fpVal;
+                            break;
+                        case "com.google.heart_minutes.summary":
+                            duration = point.value[1]?.intVal || 0; // Use the integer value for duration
+                            heartPoints = point.value[0]?.fpVal || 0;
+                            break;
+                        case "com.google.calories.expended":
+                            calories = point.value[0].fpVal;
+                            break;
+                        case "com.google.step_count.delta":
+                            stepsCount = point.value[0].intVal;
+                            break;
+                        case "com.google.speed.summary":
+                            speed = `${point.value[0].fpVal} m/s`;
+                            break;
+                    }
+                });
+            });
+
+            console.log([activityType, duration, startTime, endTime, distance, heartPoints, calories, stepsCount, speed]);
+
+            return {
+                activityType,
+                duration,
+                startTime,
+                endTime,
+                distance,
+                heartPoints,
+                calories,
+                stepsCount,
+                speed,
+            } as SessionData;
+        });
+    }
 
 
     const setGoogleAccessToken = (token: string | null) => {
@@ -110,84 +239,87 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
         }
     };
 
-    // Function to get all running sessions
-    const getAllRunningSessions = async (startTime: number, endTime: number): Promise<any> => {
-        const runningDataSourceId = 'derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments';
-        return fetchData('com.google.running', runningDataSourceId, startTime, endTime);
+    const transformWeightData = (data: any): WeightData[] => {
+        return data.bucket.flatMap((bucket: any) =>
+            bucket.dataset.flatMap((dataset: any) =>
+                dataset.point.flatMap((point: any) =>
+                    point.value.map((val: any) => ({
+                        date: formatNanoToDateTime(point.startTimeNanos as string),
+                        weight: val.fpVal || 0,
+                    }))
+                )
+            )
+        );
     };
 
-    // Function to get all walking sessions
-    const getAllWalkingSessions = async (startTime: number, endTime: number): Promise<any> => {
-        const walkingDataSourceId = 'derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments';
-        return fetchData('com.google.walking', walkingDataSourceId, startTime, endTime);
+    const transformHeightData = (data: any): HeightData[] => {
+        return data.bucket.flatMap((bucket: any) =>
+            bucket.dataset.flatMap((dataset: any) =>
+                dataset.point.flatMap((point: any) =>
+                    point.value.map((val: any) => ({
+                        date: formatNanoToDateTime(point.startTimeNanos as string),
+                        height: point.value[0]?.fpVal || 0,
+                    }))
+                )
+            )
+        );
     };
 
-    // Function to get running summary
-    const getRunningSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const runningSummaryDataSourceId = 'derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments';
-        return fetchData('com.google.activity.summary', runningSummaryDataSourceId, startTime, endTime);
+    // Function to convert nanoseconds to date with time (dd/mm/yyyy) (hh:mm)
+    const formatNanoToDateTime = (nanoSeconds: string): string => {
+        const millis = parseInt(nanoSeconds) / 1e6; // Convert nanoseconds to milliseconds
+        return formatMillisToDateTime(millis.toString());
     };
 
-
-    // Function to get walking summary
-    const getWalkingSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const walkingSummaryDataSourceId = 'derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments';
-        const data = await fetchData('com.google.activity.summary', walkingSummaryDataSourceId, startTime, endTime);
-
-        // Filter the data for walking activity type (Google Fit activity type for walking is 7)
-        const walkingData = data.bucket.filter((item: any) => item.value[0].intVal === 7);
-
-        return data;
-    };
-
-    // Function to get calories burned summary
-    const getCaloriesBurnedSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const caloriesBurnedDataSourceId = 'derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended';
-        return fetchData('com.google.calories.expended', caloriesBurnedDataSourceId, startTime, endTime);
-    };
-
-    // Function to get heart points summary
-    const getHeartPointSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const heartPointsDataSourceId = 'derived:com.google.heart_minutes:com.google.android.gms:merge_heart_minutes';
-        return fetchData('com.google.heart_minutes.summary', heartPointsDataSourceId, startTime, endTime);
-    };
-
-    // Function to get move minutes summary
-    const getMoveMinutesSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const moveMinutesDataSourceId = 'derived:com.google.active_minutes:com.google.android.gms:merge_active_minutes';
-        return fetchData('com.google.active_minutes', moveMinutesDataSourceId, startTime, endTime);
-    };
-
-    // Function to get steps count summary
-    const getStepsCountSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const stepsCountDataSourceId = 'derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas';
-        return fetchData('com.google.step_count.delta', stepsCountDataSourceId, startTime, endTime);
-    };
-
-
-    // Function to get height summary
-    const getHeightSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const heightDataSourceId = 'derived:com.google.height:com.google.android.gms:merge_height';
-        return fetchData('com.google.height.summary', heightDataSourceId, startTime, endTime);
-    };
 
     // Function to get weight summary
-    const getWeightSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const weightDataSourceId = 'derived:com.google.weight:com.google.android.gms:merge_weight';
-        return fetchData('com.google.weight.summary',weightDataSourceId, startTime, endTime);
+    const getWeightSummary = async (startTime: number, endTime: number): Promise<WeightData[]> => {
+        return new Promise<WeightData[]>((resolve, reject) => {
+            fetchData('com.google.weight', 'derived:com.google.weight:com.google.android.gms:merge_weight', startTime, endTime)
+                .then((response) => {
+                    resolve(transformWeightData(response));
+                }).catch(error => reject(error));
+        });
     };
 
-    // Function to get duration summary
-    const getDurationSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const durationDataSourceId = 'derived:com.google.active_minutes:com.google.android.gms:merge_active_minutes';
-        return fetchData('com.google.duration', durationDataSourceId, startTime, endTime);
+    //The last weight from last 3 months, if the user didn't enter any weight in the last 3 months, so reject...
+    const getCurrentWeight = async (startTime: number, endTime: number): Promise<WeightData> => {
+        return new Promise<WeightData>((resolve, reject) => {
+            getWeightSummary(startTime, endTime).then(response => {
+                if(response.length > 0){
+                    resolve(response.reverse()[0]);
+                } else {
+                    alert("We see you don't have an updated weight... Please enter your current weight in Google-Fit app");
+                    reject(new Error("The user don't have any updated weight from the last 90 days in Google-Fit..."))
+                }
+            }).catch(error => reject(error))
+        })
+    }
+
+    // Function to get height summary
+    const getHeightSummary = async (startTime: number, endTime: number): Promise<HeightData[]> => {
+        return new Promise<HeightData[]>((resolve, reject) => {
+            fetchData('com.google.height', 'derived:com.google.height:com.google.android.gms:merge_height', startTime, endTime)
+                .then(response => {
+                    resolve(transformHeightData(response));
+                }).catch(error => reject(error))
+        });
     };
 
-    // Function to get speed summary
-    const getSpeedSummary = async (startTime: number, endTime: number): Promise<any> => {
-        const speedDataSourceId = 'derived:com.google.speed:com.google.android.gms:merge_speed';
-        return fetchData('com.google.speed.summary', speedDataSourceId, startTime, endTime);
-    };
+    //The last height from last 3 months, if the user didn't enter any height in the last 3 months, so reject...
+    const getCurrentHeight = async (startTime: number, endTime: number): Promise<HeightData> => {
+        return new Promise<HeightData>((resolve, reject) => {
+            getHeightSummary(startTime, endTime).then(response => {
+                if(response.length > 0){
+                    resolve(response.reverse()[0]);
+                } else {
+                    alert("We see you don't have an updated height... Please enter your current height in Google-Fit app");
+                    reject(new Error("The user don't have any updated height from the last 90 days in Google-Fit..."))
+                }
+            }).catch(error => reject(error))
+        })
+    }
+
 
     return (
         <GoogleFitContext.Provider
@@ -195,17 +327,11 @@ const GoogleFitProvider: React.FC<{ children: React.ReactNode }> = ({children}) 
                 googleAccessTokenState,
                 setGoogleAccessToken,
                 configureGoogleFit,
-                getAllRunningSessions,
-                getAllWalkingSessions,
-                getRunningSummary,
-                getCaloriesBurnedSummary,
-                getHeartPointSummary,
-                getMoveMinutesSummary,
-                getStepsCountSummary,
                 getHeightSummary,
+                getCurrentHeight,
                 getWeightSummary,
-                getDurationSummary,
-                getSpeedSummary,
+                getCurrentWeight,
+                fetchSessionsDataFromGoogleFit
             }}
         >
             {children}
@@ -220,7 +346,6 @@ const useGoogleFit = (): GoogleFitContextProps => {
     }
     return context;
 };
-
 
 
 export {GoogleFitProvider, useGoogleFit};

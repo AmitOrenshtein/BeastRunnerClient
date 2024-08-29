@@ -1,6 +1,7 @@
-import { Text, View, StyleSheet, Pressable, Modal } from "react-native";
+import { Text, View, StyleSheet, Pressable, Modal, Dimensions } from "react-native";
 import { IsRePlanNeededValues, WeeklyPlan } from "../types/training";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
+const { width, height } = Dimensions.get("window");
 
 export default function RePlanWorkouts({isRePlanNeeded, setIsRePlanNeeded, setPlan}: {
     isRePlanNeeded: IsRePlanNeededValues, 
@@ -27,7 +28,7 @@ export default function RePlanWorkouts({isRePlanNeeded, setIsRePlanNeeded, setPl
             <View style={styles.modalView}>
                 <Text style={styles.titleText}>Let me help!</Text>
                 <Text style={styles.contentText}>
-                    I see the last few trainings were difficult for you.
+                    I see the last few trainings were {isRePlanNeeded === IsRePlanNeededValues.ToEasy ? 'easy' : 'difficult'} for you.
                     Would you like us to readujst your training plan?
                 </Text>
                 <View style={{flexDirection:"row", alignSelf:"center"}}>
@@ -49,15 +50,19 @@ export default function RePlanWorkouts({isRePlanNeeded, setIsRePlanNeeded, setPl
 
 const styles = StyleSheet.create({
     modalView: {
-        marginHorizontal:'5%',
-        marginVertical: 100,
+        marginHorizontal:'10%',
+        marginVertical: height / 5,
+        minHeight: height / 2.5,
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,
+        alignItems: 'center',
         shadowColor: '#000',
         shadowOpacity: 0.25,
         shadowRadius: 4,
+        elevation: 5,
         flex: 1,
+        justifyContent: 'center',
     },
     titleText: {
         fontWeight: "bold", 

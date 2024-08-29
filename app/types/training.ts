@@ -3,9 +3,16 @@ export interface WeeklyPlan {
     week: number;
 }
 
+export interface PlainWorkout {
+    title: string;
+    distance: string;
+    workoutTime: string;
+    description: string;
+}
+
 export interface Workout {
     date: Date | string;
-    workout: string;
+    workout: PlainWorkout;
     difficultyFeedback?: number;
     completedDistance?: number;
     completedTime?: number;

@@ -37,8 +37,8 @@ const UserData: FC<UserDataProps> = ({ age, gender, dispatchUserAge, dispatchUse
 
   return (
     <View>
-      <View>
-        <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20 }}>
+      <View  style={{flexDirection: 'row', marginLeft: 40}}>
+        <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20, marginTop: 40 }}>
           Insert your age:{" "}
         </Text>
         <TextInput
@@ -49,21 +49,26 @@ const UserData: FC<UserDataProps> = ({ age, gender, dispatchUserAge, dispatchUse
           value={selectedAge}
         />
       </View>
-      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20 }}>
+      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20, marginLeft: 40 }}>
         Select your gender:{" "}
       </Text>
-      <RadioButton
-        options={genderOptions}
-        selectedOption={selectedGender}
-        onSelect={(gender: string) => handleSelectGender(gender as Gender)}
-      />
+      <View style={{marginLeft: 40}}>
+        <RadioButton
+          options={genderOptions}
+          selectedOption={selectedGender}
+          onSelect={(gender: string) => handleSelectGender(gender as Gender)}
+        />
+      </View>
     </View>
   );
 };
 const styles = StyleSheet.create({
   modalText: {
     marginVertical: 10,
+    marginHorizontal: 30,
     textAlign: 'center',
-    color:"gray"
+    backgroundColor: '',
+    fontSize: 28,
+    padding: 0
   },})
 export default UserData;
