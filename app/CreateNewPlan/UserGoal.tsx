@@ -38,7 +38,7 @@ const UserGoal: FC<UserGoalProps> = ({ userGoal, dispatchUserGoal }) => {
 
   return (
     <View>
-      <Text style={{ fontSize: 25, fontWeight: 600, marginVertical: 20, alignSelf: "center", margin: 40 }}>
+      <Text style={{fontSize: 25, fontWeight: 600, marginVertical: 20, alignSelf: "center", margin: 40}}>
         Choose your Goal:{" "}
       </Text>
       <View style={{marginHorizontal: 40}}>
