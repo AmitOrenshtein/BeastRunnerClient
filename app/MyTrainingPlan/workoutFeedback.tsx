@@ -24,8 +24,6 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
                 moment(workout.date, "YYYY-MM-DD").utc(true).toString() === moment(day.date, "YYYY-MM-DD").utc(true).toString() ? 
             editedWorkout : day) }));
             PlanAPI.updatePlan(updatedPlan).then((res) => {
-                console.log(res);
-                console.log("isRePlan: " + res.data.rePlanNeeded);
                 setPlan(res.data.updatedPlan.plan);
                 if(res.data.rePlanNeeded != IsRePlanNeededValues.NoNeedForRePlan) {
                     replanHanler(res.data.rePlanNeeded);
@@ -124,11 +122,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 25,
-        // alignItems: 'center',
+        alignItems: 'center',
         shadowColor: '#000',
         shadowOpacity: 0.25,
         shadowRadius: 4,
-        // elevation: 5,
+        elevation: 5,
         flex: 1,
         justifyContent: 'center',
     },
