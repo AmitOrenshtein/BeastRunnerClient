@@ -48,11 +48,17 @@ const NotificationModal = (props: NotificationModalProps) => {
     >
       <View style={styles.container}>
         <Text style={styles.title}>Hi it's Skyler!</Text>
-        {notifications.map((notification) => 
-          <View key={notification._id} style={styles.notification}>
-            <Text>{`Workout Reminder for Today (${notification.date}) - ${notification.workout?.title}`}</Text>
-            <Button onPress={() => removeNotification(notification._id)}>x</Button>
-          </View>
+        <View style={styles.line} />
+        {notifications.map((notification) =>
+          <> 
+            <View key={notification._id} style={styles.notification}>
+              <Text>{`Workout Reminder for Today (${notification.date}) - ${notification.workout?.title}`}</Text>
+              <Button labelStyle={styles.button} onPress={() => removeNotification(notification._id)}>
+                x
+              </Button>
+            </View>
+            <View style={styles.line} />
+          </>
         )}
       </View>
     </Modal>
@@ -81,9 +87,19 @@ const styles = StyleSheet.create({
     color: Theme.colors.themeColor
   },
   notification: {
-    display: 'flex',
-    marginBottom: 20
+    flexDirection: "row",
+    marginBottom: 20,
+    justifyContent: "space-between",
   },
+  button: {
+    fontSize: 20,
+    color: 'black'
+  },
+  line: {
+    borderBottomColor: Theme.colors.darkBlue,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginBottom: 23
+  }
 });
 
 export default NotificationModal;
