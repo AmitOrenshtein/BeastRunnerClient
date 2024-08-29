@@ -75,7 +75,7 @@ export const BasicTimeline = () => {
                             Today!
                           </Text>} */}
                           <Text style={cardStyles(!!moment().isSame(moment(workout.date, "YYYY-MM-DD").utc(true), 'day')).dateText}>
-                            {`${(!!moment().isSame(moment(workout.date, "YYYY-MM-DD").utc(true), 'day') ? 'Ttoday! - ' : '')}${(workout.date as string)}`}
+                            {`${(!!moment().isSame(moment(workout.date, "YYYY-MM-DD").utc(true), 'day') ? 'Ttoday! - ' : '')}${(formatDate(workout.date as string))}`}
                           </Text >
                         </View>
                         <Text style={{ fontSize: 12, color: "black", maxWidth:"90%", marginBottom: 8}}>
