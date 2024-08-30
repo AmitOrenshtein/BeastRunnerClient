@@ -1,16 +1,17 @@
 import { Text, View, StyleSheet, Pressable, Modal, Dimensions } from "react-native";
 const { width, height } = Dimensions.get("window");
-import {WeeklyPlan, Workout } from "../types/training";
+import {IsRePlanNeededValues, WeeklyPlan, Workout } from "../types/training";
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { Divider, Icon } from 'react-native-elements';
 import { PlanAPI } from "@/serverAPI/PlanAPI";
 import { SegmentedButtons, TextInput } from 'react-native-paper';
 
-export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible}:
+export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, setModalVisible, replanHanler}: 
     {plan: WeeklyPlan[], setPlan: React.Dispatch<React.SetStateAction<WeeklyPlan[]>>
         workout: Workout,
-        modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>}) {
+        modalVisible: boolean, setModalVisible: React.Dispatch<React.SetStateAction<boolean>>, 
+        replanHanler: React.Dispatch<React.SetStateAction<IsRePlanNeededValues>>}) {
     const [editedWorkout, setEditedWorkout] = useState<Workout>(workout);
 
     useEffect(() => {
@@ -21,9 +22,12 @@ export default function WorkoutFeedback({plan, setPlan, workout, modalVisible, s
         const updatedPlan:WeeklyPlan[] = plan.map((week) => 
             ({week: week.week, days: week.days.map(day => 
                 moment(workout.date, "YYYY-MM-DD").utc(true).toString() === moment(day.date, "YYYY-MM-DD").utc(true).toString() ? 
-            editedWorkout : day) }))
+            editedWorkout : day) }));
             PlanAPI.updatePlan(updatedPlan).then((res) => {
-                setPlan(res.data.plan);
+                setPlan(res.data.updatedPlan.plan);
+                if(res.data.rePlanNeeded != IsRePlanNeededValues.NoNeedForRePlan) {
+                    replanHanler(res.data.rePlanNeeded);
+                }
                 setModalVisible(!modalVisible);
         })
     }
@@ -149,6 +153,9 @@ const styles = StyleSheet.create({
         justifyContent:"space-between",
         flexDirection:"row",
       },
+      textInput: {
+        marginVertical:5
+      }
   });
   
   
