@@ -10,8 +10,8 @@ import { Card, Button } from "react-native-paper";
 import WorkoutFeedback from "./workoutFeedback";
 import { useFocusEffect } from "@react-navigation/native";
 import { useGoogleFit } from "../context/GoogleFitContext";
-import {formatDate} from "@/app/(tabs)/PersonalInfo";
 import appTheme from '../../appTheme'
+import {formatDate} from "@/app/(tabs)/PersonalInfo";
 
 export const BasicTimeline = () => {
   const {fetchSessionsDataFromGoogleFit} = useGoogleFit();

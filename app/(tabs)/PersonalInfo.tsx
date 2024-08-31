@@ -20,14 +20,51 @@ const LEVEL_OPTIONS = levelOptions;
 
 const GOAL_OPTIONS = goalOptions;
 
-export const formatDate = (inputDate: string) => {
-    const date = new Date(inputDate);
+export const formatDate = (dateString: string) => {
+    // const date = new Date(inputDate);
+    //
+    // const day = date.getDate().toString().padStart(2, '0');
+    // const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    // const year = date.getFullYear();
+    //
+    // return `${day}/${month}/${year}`;
+    // Extract the date part before 'T'
 
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
 
-    return `${day}/${month}/${year}`;
+
+    // const datePart = inputDate.split('T')[0]; // "YYYY-MM-DD"
+    //
+    // // Split the date part into year, month, and day
+    // const [year, month, day] = datePart.split('-'); // ["YYYY", "MM", "DD"]
+    //
+    // // Rearrange to the desired format "DD/MM/YYYY"
+    // const formattedDate = `${day}/${month}/${year}`;
+    // console.log("beforeFormattedDay: ", inputDate);
+    // console.log("formattedDay: ", formattedDate);
+    //
+    // return formattedDate;
+
+    let day: string, month: string, year: string;
+    let formattedDate: string = "";
+
+    // Check if the date string contains a 'T' character to determine the format
+    if (dateString.includes('T')) {
+        // If the date is in the format YYYY-MM-DDT21:00:00.000Z
+        const [datePart] = dateString.split('T'); // Get the date part before 'T'
+        [year, month, day] = datePart.split('-'); // Split by '-'
+    } else if (dateString.includes('/')) {
+        // If the date is in the format YYYY/MM/DD
+        [year, month, day] = dateString.split('/'); // Split by '/'
+    } else {
+        // If the date format does not match any known patterns
+        //throw new Error('Invalid date format');
+        formattedDate = "";
+    }
+
+    // Rearrange to "DD/MM/YYYY"
+    formattedDate = `${day}/${month}/${year}`;
+
+    return formattedDate;
 }
 
 export default function MyTraining() {

@@ -15,6 +15,32 @@ const DateRangePicker: FC<DateRangePickerProps> = ({ label, dispatchDates }) => 
         end: undefined
     });
 
+    function convertCalendarDateToModernFormat(calendarDate:string) {
+        const desiredTime = "21:00:00.000+00:00";
+        // Extract the date part (before 'T')
+        const datePart = calendarDate.split('T')[0]; // "2024-08-23"
+
+        // Combine the date part with the desired time
+        const formattedDate = `${datePart}T${desiredTime}`;
+
+        console.log(formattedDate); // "dateT21:00:00.000+00:00"
+
+        return formattedDate;
+    }
+
+    const handleDispatchDates =  (startDate: string, endDate: string) => {
+        const formattedStartDate = convertCalendarDateToModernFormat(startDate);
+        const formattedEndDate = convertCalendarDateToModernFormat(endDate);
+
+        dispatchDates(formattedStartDate, formattedEndDate);
+    }
+
+// Usage example
+    const calendarDate = "2024-08-23T00:00:00.000+00:00";
+
+    const formattedDate = convertCalendarDateToModernFormat(calendarDate);
+
+
     const handleDayPress = (day: any) => {
         const { dateString } = day;
         if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
@@ -28,11 +54,11 @@ const DateRangePicker: FC<DateRangePickerProps> = ({ label, dispatchDates }) => 
             if (isBefore(endDate, startDate)) {
                 // If end date is before start date, swap the dates
                 setSelectedRange({ start: dateString, end: selectedRange.start });
-                dispatchDates(dateString, selectedRange.start);
+                handleDispatchDates(dateString, selectedRange.start);
             } else {
                 // Valid end date
                 setSelectedRange({ ...selectedRange, end: dateString });
-                dispatchDates(selectedRange.start, dateString);
+                handleDispatchDates(selectedRange.start, dateString);
             }
         } else  {
             setSelectedRange({ start: undefined, end: undefined });
