@@ -105,6 +105,7 @@ export default function TabsLayout() {
                             href: null,
                         }}
                     />
+                    {/*//todo: Remove GoogleFitData file from (tabs) before the presentation!!!*/}
                     <Tabs.Screen
                         name="GoogleFitData"
                         options={{

@@ -10,16 +10,18 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
     },
-    // menuItemContainer: {
-    //     flex: 1,
-    //     justifyContent: 'center',
-    //     alignItems: 'center',
-    //     paddingVertical: 10, // Adjust as needed
+    menuContainer:{
+        top: 35,
+        left: -122,
+        position: "absolute",
+        zIndex: 100,
+        width: 150,
+        // justifyContent: "flex-end",
+    },
+    // menuItem: {
+    //     backgroundColor: "#2f93ab",
+    //     color:'white',
     // },
-    // menuItemText: {
-    //     fontSize: 16,
-    //     color: 'black', // Adjust as needed
-    // }
 });
 
 const GenericMenu = (props: GenericMenuProps) => {
@@ -33,6 +35,7 @@ const GenericMenu = (props: GenericMenuProps) => {
             <Menu
                 visible={menuVisible}
                 onDismiss={closeMenu}
+                style={styles.menuContainer}
                 anchor={
                     <TouchableOpacity onPress={openMenu}>
                         <Icon
@@ -46,6 +49,7 @@ const GenericMenu = (props: GenericMenuProps) => {
                 {props.menuItems.map(value =>
                     <Menu.Item 
                         key={value.title}
+                        // style={styles.menuItem}
                         onPress={() => {
                         (!value.keepMenuOpen && closeMenu());
                         value.onItemPress();

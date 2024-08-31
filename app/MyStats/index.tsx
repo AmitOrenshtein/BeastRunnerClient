@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import moment from "moment";
 import { GeneralStatsI } from "./types";
+import {formatDate} from "@/app/(tabs)/PersonalInfo";
 
 interface PlanDateI {
   firstDate: string;
@@ -132,7 +133,7 @@ const MyStats = () => {
       <View style={styles.container}>
         <ProgressChart
           data={{
-            labels: [`${planDates?.firstDate} - ${planDates?.lastDate}`],
+            labels: planDates ? [`${formatDate(planDates.firstDate)} - ${formatDate(planDates.lastDate)}`] : undefined,
             data: [planDates?.progressPercentage || 0],
           }}
           width={Dimensions.get("window").width}
@@ -144,7 +145,7 @@ const MyStats = () => {
         />
         <LineChart
           data={{
-            labels: analyzedData?.map((el: any) => el?.date),
+            labels: analyzedData?.map((el: any) => {return el ? formatDate(el.date) : ""}),
             datasets: [
               {
                 data: analyzedData?.map((el: any) => el?.difficultyFeedback),

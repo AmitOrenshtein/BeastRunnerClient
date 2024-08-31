@@ -12,6 +12,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useGoogleFit } from "../context/GoogleFitContext";
 import appTheme from '../../appTheme'
 import RePlanWorkouts from "./RePlanWorkouts";
+import {formatDate} from "@/app/(tabs)/PersonalInfo";
 
 export const BasicTimeline = () => {
   const {fetchSessionsDataFromGoogleFit} = useGoogleFit();
@@ -83,7 +84,7 @@ export const BasicTimeline = () => {
                             Today!
                           </Text>} */}
                           <Text style={cardStyles(!!moment().isSame(moment(workout.date, "YYYY-MM-DD").utc(true), 'day')).dateText}>
-                            {`${(!!moment().isSame(moment(workout.date, "YYYY-MM-DD").utc(true), 'day') ? 'Ttoday! - ' : '')}${(workout.date as string)}`}
+                            {`${(!!moment().isSame(moment(workout.date, "YYYY-MM-DD").utc(true), 'day') ? 'Ttoday! - ' : '')}${(formatDate(workout.date as string))}`}
                           </Text >
                         </View>
                         <Text style={{ fontSize: 12, color: "black", maxWidth:"90%", marginBottom: 8}}>
@@ -105,7 +106,7 @@ export const BasicTimeline = () => {
                         ) : (
                           <Text></Text>
                         )}
-                        {!!workout.difficultyFeedback || !!workout.completedDistance || !!workout.completedTime || !workout.workout.workoutTime 
+                        {!!workout.difficultyFeedback || !!workout.completedDistance || !!workout.completedTime || !workout.workout.workoutTime
                         ? <Button
                           textColor={appTheme.colors.darkBlue}
                           style={{borderRadius: 0, marginBottom: 10 }}
@@ -115,7 +116,7 @@ export const BasicTimeline = () => {
                           }}
                           >
                             edit feedback
-                        </Button> 
+                        </Button>
                         : <Button
                           textColor="white"
                           style={{ backgroundColor: "gray", borderRadius: 4 }}
@@ -174,9 +175,9 @@ export const BasicTimeline = () => {
         workout={editedWorkout}
         replanHanler={setIsRePlanNeeded}
       />
-      <RePlanWorkouts 
-        isRePlanNeeded={isRePlanNeeded} 
-        setIsRePlanNeeded={setIsRePlanNeeded} 
+      <RePlanWorkouts
+        isRePlanNeeded={isRePlanNeeded}
+        setIsRePlanNeeded={setIsRePlanNeeded}
         setPlan={setPlan} />
     </>
   );
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     marginBottom: 6
   },
   trainingTitle: {
-    flex: 1,     
+    flex: 1,
     justifyContent: "flex-start",
     fontSize: 20,
   },
