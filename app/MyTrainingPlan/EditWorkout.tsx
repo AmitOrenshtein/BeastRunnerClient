@@ -24,7 +24,7 @@ export default function EditWorkout({plan, setPlan, workout, modalVisible, setMo
                 moment(workout.date, "YYYY-MM-DD").utc(true).toString() === moment(day.date, "YYYY-MM-DD").utc(true).toString() ? 
             editedWorkout : day) }))
             PlanAPI.updatePlan(updatedPlan).then((res) => {
-                setPlan(res.data.plan);
+                setPlan(res.data.updatedPlan.plan);
                 setModalVisible(!modalVisible);
         })
     }

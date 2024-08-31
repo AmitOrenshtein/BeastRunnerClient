@@ -2,15 +2,16 @@ import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
 import { PlanAPI } from "@/serverAPI/PlanAPI";
-import { WeeklyPlan, Workout } from "../types/training";
+import { IsRePlanNeededValues, WeeklyPlan, Workout } from "../types/training";
 import EditWorkout from "./EditWorkout";
 const { width, height } = Dimensions.get("window");
 import { Icon } from "react-native-elements";
-import { Card, Button } from "react-native-paper";
+import { Card, Button, ActivityIndicator } from "react-native-paper";
 import WorkoutFeedback from "./workoutFeedback";
 import { useFocusEffect } from "@react-navigation/native";
 import { useGoogleFit } from "../context/GoogleFitContext";
 import appTheme from '../../appTheme'
+import RePlanWorkouts from "./RePlanWorkouts";
 import {formatDate} from "@/app/(tabs)/PersonalInfo";
 
 export const BasicTimeline = () => {
@@ -19,6 +20,8 @@ export const BasicTimeline = () => {
     useState<boolean>(false);
   const [feedbackModalVisible, setFeedbackModalVisible] =
     useState<boolean>(false);
+  const [isRePlanNeeded, setIsRePlanNeeded] =
+    useState<IsRePlanNeededValues>(IsRePlanNeededValues.NoNeedForRePlan);
   const [editedWorkout, setEditedWorkout] = useState<Workout>({
     date: new Date(),
     workout: {
@@ -29,9 +32,11 @@ export const BasicTimeline = () => {
     },
   });
   const [plan, setPlan] = useState<WeeklyPlan[]>([]);
+  const [isLoading, setIsLoadong] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
+      setIsLoadong(true);
       PlanAPI.getPlan().then((res) => {
         const newPlan = [...res.data.plan];
         const startTime = Date.now() - 60 * 24 * 60 * 60 * 1000; // Last 90 days
@@ -45,7 +50,11 @@ export const BasicTimeline = () => {
           })}
         )))
           setPlan(newPlan)
-        }).catch(() => setPlan(newPlan))
+          setIsLoadong(false);
+        }).catch(() => {
+          setPlan(newPlan);
+          setIsLoadong(false);
+        })
       });
     }, [])
   );
@@ -141,7 +150,10 @@ export const BasicTimeline = () => {
     );
   };
 
-  if (plan.length === 0) {
+  if (isLoading && plan.length === 0) {
+    return <ActivityIndicator size="large" color={appTheme.colors.themeColor} style={{marginTop: 30}} />
+  }
+  else if (plan.length === 0) {
     return <Text>No Plan Created Yet..</Text>;
   }
 
@@ -161,7 +173,12 @@ export const BasicTimeline = () => {
         modalVisible={feedbackModalVisible}
         setModalVisible={setFeedbackModalVisible}
         workout={editedWorkout}
+        replanHanler={setIsRePlanNeeded}
       />
+      <RePlanWorkouts
+        isRePlanNeeded={isRePlanNeeded}
+        setIsRePlanNeeded={setIsRePlanNeeded}
+        setPlan={setPlan} />
     </>
   );
 };
