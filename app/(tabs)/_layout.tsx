@@ -105,15 +105,6 @@ export default function TabsLayout() {
                             href: null,
                         }}
                     />
-                    {/*//todo: Remove GoogleFitData file from (tabs) before the presentation!!!*/}
-                    <Tabs.Screen
-                        name="GoogleFitData"
-                        options={{
-                            headerShown: false,
-                            title: 'GoogleFit Data',
-                            tabBarIcon: () => <AntDesign name='edit' size={24} color={appTheme.colors.themeColor}/>
-                        }}
-                    />
                 </Tabs>
             )}
         </>
